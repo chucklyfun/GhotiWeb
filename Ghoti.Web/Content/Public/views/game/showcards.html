@@ -1,0 +1,25 @@
+<section data-ng-controller="GameController" data-ng-init="init()">
+    <label>{{game.Id}}</label>
+    <label>{{data}}</label>
+    <select ng-model="CurrenctAction" ng-options="g as label for value in GameActions"/>
+    <label>Message</label>
+    <label>{{Message}}</label>
+    <label>Response</label>
+    <label>{{Response}}</label>
+    <button ng-click="SendHello()" >Send Hello"</button>
+    <ul>
+        <li data-ng-repeat="p in Players">
+            <span>{{c.Title}}</span> /
+            <span>{{c.Text}}</span>
+            <img ng-src="{{c.imageUrl}}" />
+        </li>
+    </ul>
+    <ul>
+        <li data-ng-repeat="c in Cards">
+            <span>{{c.Title}}</span> /
+            <span>{{c.Text}}</span>
+            <img ng-src="{{c.imageUrl}}" />
+        </li>
+    </ul>
+
+</section>

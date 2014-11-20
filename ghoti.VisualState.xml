@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<VisualState xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" ShowCheckBoxes="false">
+  <TopNode>[0-1000]C:\src\Dropbox\ghoti.web\ghoti.nunit</TopNode>
+  <SelectedNode>[0-1000]C:\src\Dropbox\ghoti.web\ghoti.nunit</SelectedNode>
+  <ExcludeCategories>false</ExcludeCategories>
+  <Nodes>
+    <Node UniqueName="[0-1000]C:\src\Dropbox\ghoti.web\ghoti.nunit" Expanded="true" />
+    <Node UniqueName="[0-1010]C:\src\Dropbox\ghoti.web\GameLogic.Test\bin\Debug\GameLogic.Test.dll" Expanded="true" />
+    <Node UniqueName="[0-1011]GameLogic" Expanded="true" />
+    <Node UniqueName="[0-1012]GameLogic.Test" Expanded="true" />
+    <Node UniqueName="[0-1001]GameLogic.Test.CardManagerTests" Expanded="true" />
+    <Node UniqueName="[0-1008]GameLogic.Test.CardUtilitiesTests" Expanded="true" />
+    <Node UniqueName="[0-1004]GameLogic.Test.GameManagerTests" Expanded="true" />
+  </Nodes>
+</VisualState>

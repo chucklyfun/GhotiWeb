@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!--This file represents the results of running a test suite-->
+<test-results name="C:\src\Dropbox\ghoti.web\ghoti.nunit" total="1" errors="1" failures="0" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2014-06-29" time="22:55:11">
+  <environment nunit-version="2.6.2.12296" clr-version="2.0.50727.5477" os-version="Microsoft Windows NT 6.1.7601 Service Pack 1" platform="Win32NT" cwd="C:\Program Files (x86)\NUnit 2.6.2\bin" machine-name="CHUCKLYFUN-PC" user="chucklyfun" user-domain="chucklyfun-PC" />
+  <culture-info current-culture="en-US" current-uiculture="en-US" />
+  <test-suite type="Project" name="C:\src\Dropbox\ghoti.web\ghoti.nunit" executed="True" result="Failure" success="False" time="3.185" asserts="0">
+    <results>
+      <test-suite type="Assembly" name="C:\src\Dropbox\ghoti.web\DataInitializer.Test\bin\Debug\DataInitializer.Test.dll" executed="True" result="Failure" success="False" time="3.156" asserts="0">
+        <results>
+          <test-suite type="Namespace" name="DataInitializer" executed="True" result="Failure" success="False" time="3.155" asserts="0">
+            <results>
+              <test-suite type="Namespace" name="Test" executed="True" result="Failure" success="False" time="3.153" asserts="0">
+                <results>
+                  <test-suite type="TestFixture" name="InitializeData" executed="True" result="Failure" success="False" time="3.148" asserts="0">
+                    <results>
+                      <test-case name="DataInitializer.Test.InitializeData.InitializeUsers" executed="True" result="Error" success="False" time="3.121" asserts="0">
+                        <failure>
+                          <message><![CDATA[System.NullReferenceException : Object reference not set to an instance of an object.]]></message>
+                          <stack-trace><![CDATA[at Utilities.Data.AppConfigConnectionStringProvider..ctor(String connectionStringName) in c:\src\Dropbox\ghoti.web\Utilities\Data\IConnectionStringProvider.cs:line 16
+at DynamicInjector906413144b2640b18a3ba9c032b2c0b9(Object[] )
+at Ninject.Activation.Context.ResolveInternal(Object scope)
+at Ninject.Activation.Context.Resolve()
+at System.Linq.Enumerable.WhereSelectEnumerableIterator`2.MoveNext()
+at System.Linq.Enumerable.SingleOrDefault[TSource](IEnumerable`1 source)
+at System.Linq.Enumerable.WhereSelectArrayIterator`2.MoveNext()
+at System.Linq.Buffer`1..ctor(IEnumerable`1 source)
+at System.Linq.Enumerable.ToArray[TSource](IEnumerable`1 source)
+at Ninject.Activation.Providers.StandardProvider.Create(IContext context)
+at Ninject.Activation.Context.ResolveInternal(Object scope)
+at Ninject.Activation.Context.Resolve()
+at System.Linq.Enumerable.WhereSelectEnumerableIterator`2.MoveNext()
+at System.Linq.Enumerable.SingleOrDefault[TSource](IEnumerable`1 source)
+at System.Linq.Enumerable.WhereSelectArrayIterator`2.MoveNext()
+at System.Linq.Buffer`1..ctor(IEnumerable`1 source)
+at System.Linq.Enumerable.ToArray[TSource](IEnumerable`1 source)
+at Ninject.Activation.Providers.StandardProvider.Create(IContext context)
+at Ninject.Activation.Context.ResolveInternal(Object scope)
+at Ninject.Activation.Context.Resolve()
+at System.Linq.Enumerable.WhereSelectEnumerableIterator`2.MoveNext()
+at System.Linq.Enumerable.SingleOrDefault[TSource](IEnumerable`1 source)
+at System.Linq.Enumerable.WhereSelectArrayIterator`2.MoveNext()
+at System.Linq.Buffer`1..ctor(IEnumerable`1 source)
+at System.Linq.Enumerable.ToArray[TSource](IEnumerable`1 source)
+at Ninject.Activation.Providers.StandardProvider.Create(IContext context)
+at Ninject.Activation.Context.ResolveInternal(Object scope)
+at Ninject.Activation.Context.Resolve()
+at System.Linq.Enumerable.WhereSelectEnumerableIterator`2.MoveNext()
+at System.Linq.Enumerable.<CastIterator>d__b1`1.MoveNext()
+at System.Linq.Enumerable.Single[TSource](IEnumerable`1 source)
+at DataInitializer.Test.InitializeData.InitializeUsers() in c:\src\Dropbox\ghoti.web\DataInitializer.Test\DataInitializerTests.cs:line 36
+]]></stack-trace>
+                        </failure>
+                      </test-case>
+                    </results>
+                  </test-suite>
+                </results>
+              </test-suite>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+    </results>
+  </test-suite>
+</test-results>
