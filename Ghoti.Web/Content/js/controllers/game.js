@@ -61,7 +61,11 @@ define(['angular', 'nggrid', 'app/config', 'services/gameRest', 'services/cards'
                         Action: '1',
                         Cards: []
                     };
-            $scope.hubs[0].SendMessageFromClient(playerEvent);
+            $scope.hubs[0].send(playerEvent);
+        };
+
+        $scope.ClientTest = function () {
+            $http({ method: 'GET', url: 'api/game/clienttest' });
         };
 
         $scope.showcards = function()

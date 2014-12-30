@@ -17,7 +17,7 @@ namespace ghoti.web.Controllers
 {
     
 
-    public class GameHub : Hub
+    public class Gamehub : Hub
     {
         private IDecisionMakerManager _decisionMakerManager{ get; set; }
         private ISignalRDecisionConnectionFactory _signalRDecisionConnectionFactory { get; set; }
@@ -25,7 +25,7 @@ namespace ghoti.web.Controllers
         private ISerializationService _serializationService { get; set; }
 
 
-        public GameHub()
+        public Gamehub()
         {
             _decisionMakerManager = Ghoti.Web.Nancy.Bootstrapper.Kernel.Get<IDecisionMakerManager>();
             PlayerEvent += _decisionMakerManager.PlayerEvent;
@@ -49,12 +49,12 @@ namespace ghoti.web.Controllers
         }
 
 
-        public void SendMessageServer(string message, string connectionId)
+        public void SendMessageFromServer(string message, string connectionId)
         {
             Clients.Client(connectionId).SendMessage(message);
         }
 
-        public void SendMessageClient(string message)
+        public void Send(string message)
         {
             var connection = _connections.FirstOrDefault(f => Context.ConnectionId.Equals(f.ConnectionId));
 
