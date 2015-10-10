@@ -28,43 +28,49 @@ namespace ghoti.web.Controllers
         public Gamehub()
         {
             _decisionMakerManager = Ghoti.Web.Nancy.Bootstrapper.Kernel.Get<IDecisionMakerManager>();
+            _signalRDecisionConnectionFactory = Ghoti.Web.Nancy.Bootstrapper.Kernel.Get<ISignalRDecisionConnectionFactory>();
             PlayerEvent += _decisionMakerManager.PlayerEvent;
+
+            _connections = new List<ISignalRDecisionConnection>();
         }
 
 
         public PlayerEventHandler PlayerEvent { get; set; }
 
-        public override Task OnConnected()
+        public void connected()
         {
             string name = Context.User.Identity.Name;
             var playerId = new ObjectId(Context.QueryString["playerId"]);
             var gameId = new ObjectId(Context.QueryString["gameId"]);
-
-            var connection = _signalRDecisionConnectionFactory.CreateISignalRDecisionConnection(
-                Context.ConnectionId, Context.User.Identity.Name, playerId, gameId);
-
-            _connections.Add(connection);
-
-            return base.OnConnected();
         }
 
+        public override Task OnConnected()
+        {
+            System.Console.WriteLine("OnConnected");
+            return base.OnConnected();
+        }
 
         public void SendMessageFromServer(string message, string connectionId)
         {
             Clients.Client(connectionId).SendMessage(message);
         }
 
-        public void Send(string message)
+        public Tuple<ObjectId, ObjectId> GetConnectionIds()
         {
-            var connection = _connections.FirstOrDefault(f => Context.ConnectionId.Equals(f.ConnectionId));
+            var playerId = new ObjectId(Context.QueryString["playerId"]);
+            var gameId = new ObjectId(Context.QueryString["gameId"]);
 
-            var playerEvent = _serializationService.Deserialize<PlayerEvent>(message);
+            return new Tuple<ObjectId, ObjectId>(gameId, playerId);
+        }
 
+        public void send(PlayerEvent eventArgs)
+        {
+            var connectionId = GetConnectionIds();
             var playerEventArgs = new PlayerEventArgs()
             {
-                GameId = connection.GameId,
-                PlayerId = connection.PlayerId,
-                PlayerEvent = playerEvent
+                GameId = connectionId.Item1,
+                PlayerId = connectionId.Item2,
+                PlayerEvent = eventArgs
             };
         }
     }

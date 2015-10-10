@@ -8,7 +8,7 @@ define(['angular', 'angularsignalr'], function (angular, angularsignalr) {
             {
                 var hub = new Hub('gamehub',
                 {
-                    methods: ['send'],
+                    methods: ['send', 'connected'],
                     queryParams: {
                         'gameId': gameId,
                         'playerId': playerId
