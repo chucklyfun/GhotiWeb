@@ -60,6 +60,18 @@ namespace ghoti.web.Controllers
                     return _gameRepository.Update(game);
                 };
 
+            Get["/api/game/Delete/{Id}"] = (_) =>
+                {
+                    _gameRepository.Delete(new ObjectId(_.Id));
+                    return true;
+                };
+
+            Get["/api/game/Delete"] = (_) =>
+                {
+                    _gameRepository.RemoveAll();
+                    return true;
+                };
+
         }
     }
 }

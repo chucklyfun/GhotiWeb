@@ -10,14 +10,19 @@ namespace Utilities
 {
     public interface ISerializationService
     {
-        string Serialize(object obj);
+        string Serialize<t>(t obj);
 
         t Deserialize<t>(string data);
     }
 
     public class SerializationService : ISerializationService
     {
-        public string Serialize(object obj)
+        public SerializationService()
+        {
+
+        }
+
+        public string Serialize<t>(t obj)
         {
             return JsonConvert.SerializeObject(obj);
         }

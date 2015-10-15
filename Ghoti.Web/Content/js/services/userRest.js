@@ -15,19 +15,19 @@ define(['angular', 'app/config'], function(angular, config) {
             return $http({ method: 'GET', url: 'api/User/Get/0' });
         };
 
-        $userRest.Get = function (userId) {
+        $userRest.get = function (userId) {
             return $http({ method: 'GET', url: 'api/User/Get/' + userId });
         };
 
-        $userRest.GetAll = function () {
+        $userRest.getAll = function () {
             return $http({ method: 'GET', url: 'api/User/Get' });
         };
 
-        $userRest.Delete = function (userId) {
+        $userRest.delete = function (userId) {
             return $http({ method: 'GET', url: 'api/User/Delete/' + userId  });
         };
 
-        $userRest.Save = function (User) {
+        $userRest.save = function (User) {
             return $http({ method: 'Put', url: 'api/User/Put', data: User });
         };
 

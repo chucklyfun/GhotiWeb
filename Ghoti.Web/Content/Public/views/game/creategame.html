@@ -1,9 +1,10 @@
 <section data-ng-controller="StartController" data-ng-init="init()">
     
-
+    <label>{{error}}</label>
     <h2>{{name}}</h2>
     <button ng-click="startGame()">Start Game</button>
-    <div class="gridStyle" ng-grid="gridOptions" />
+    <h3>Players</h3>
+    <div class="gridStyle" ng-grid="playerGridOptions" />
     <ul>
 		<li data-ng-repeat="p in gv.Players">
 			<div>{{p.Username}}</div>
@@ -11,6 +12,6 @@
             <div>{{p.Email}}</div>
 		</li>
     </ul>
-
-
+    <h3>Games</h3>
+    <div class="gridStyle" ng-grid="gameGridOptions" />
 </section>

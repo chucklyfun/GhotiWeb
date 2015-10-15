@@ -19,6 +19,8 @@ using Nancy.Serialization.JsonNet;
 using GameLogic.External;
 using GameLogic.Player;
 using GameLogic.Deck;
+using System.Reflection;
+using MongoDB.Bson.Serialization;
 
 
 namespace Ghoti.Web.Nancy
@@ -61,6 +63,14 @@ namespace Ghoti.Web.Nancy
 
             kernel.Bind<ISignalRDecisionConnection>().To<SignalRDecisionConnection>();
             kernel.Bind<ISignalRDecisionConnectionFactory>().ToFactory();
+
+
+            var types = Assembly.GetAssembly(typeof(Game))
+                    .GetTypes()
+                    .Where(type => type.IsSubclassOf(typeof(EntityBase)));
+            foreach (var t in types)
+                BsonClassMap.LookupClassMap(t);
+
         }
     }
 }
