@@ -127,9 +127,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AsynchronousSocketListener.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="AsynchronousSocketListener.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="Data\EF\DataContext.cs" />
     <Compile Include="Data\EF\EfRepository.cs" />
