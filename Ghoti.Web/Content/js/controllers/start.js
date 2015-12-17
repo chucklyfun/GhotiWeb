@@ -8,36 +8,78 @@ define(['angular', 'nggrid', 'app/config', 'services/gameRest', 'services/cards'
         
         $scope.global = Global;
 
-        $scope.init = function () {
-            $userRest.GetAll().success(function (data, status, headers, config) {
-                $scope.Users = data;
+        $scope.loadGames = function()
+        {
+            $gameRest.getAll().success(function (data, status, headers, config) {
+                $scope.games = data;
             }, function (data, status, headers, config) {
                 $scope.error = data;
             });
+        };
 
-            $gameRest.create().success(function (data, status, headers, config) {
-                $scope.gv = data;
-            }).error(function (data, status, headers, config) {
+        $scope.loadUsers = function ()
+        {
+            $userRest.getAll().success(function (data, status, headers, config) {
+                $scope.users = data;
+            }, function (data, status, headers, config) {
                 $scope.error = data;
             });
+        }
 
-            $scope.gridOptions = { data: 'Users', columnDefs: 'cols' };
+        $scope.init = function ()
+        {
+            $scope.playerGridOptions = { data: 'users', columnDefs: 'playerCols' };
+            $scope.gameGridOptions = { data: 'games', columnDefs: 'gameCols' };
             $scope.name = "test name";
             $scope.players = [];
-            $scope.cols = [
-                { 'cellTemplate': '<button id="btnAddPlayer" type="button" class="btn btn-primary" ng-click="addPlayer(row)" >Add Player</button>' },
+            $scope.games = [];
+            $scope.playerCols = [
+                { 'cellTemplate': '<button id="btnAddPlayer" type="button" class="btn btn-primary" ng-click="addPlayer(row.entity)" >Add Player</button>' },
                 { 'field': 'UserName', displayName: 'Username' },
                 { 'field': 'FullName', displayName: 'Name' },
                 { 'field': 'Email', displayName: 'E-mail' }];
 
+            $scope.gameCols = [
+                { 'cellTemplate': '<button id="btnLoadGame" type="button" class="btn btn-primary" ng-click="loadGame(row.entity)" >Load</button>' },
+                { 'field': 'Id', displayName: 'Id' },
+                { 'cellTemplate': '<ul><li ng-repeat="p in row.Players">{{p.FullName}} ({{p.Email}})</li></ul>' },
+                { 'cellTemplate': '<button id="btnDeleteGame" type="button" class="btn btn-primary" ng-click="deleteGame(row.entity)" >Delete</button>' }];
+
+            $scope.loadUsers();
+
+            $scope.loadGames();
         };
     
-        $scope.addPlayer = function (row) {
-            $gameRest.addPlayer($scope.gv.Id, row.entity.Id).success(function (data, status, headers, config) {
+        $scope.addPlayer = function (entity) {
+            $gameRest.addPlayer($scope.gv.Id, entity.Id).success(function (data, status, headers, config) {
                 if (data == "true") {
-                    $scope.gv.Players.push(row.entity);
+                    $scope.gv.Players.push(entity);
                 } else {
-                    $scope.error = "Unable to add User " & row.entity.UserName;
+                    $scope.error = "Unable to add User " & entity.UserName;
+                }
+            }).error(function (data, status, headers, config) {
+                $scope.error = data;
+            });
+        };
+
+        $scope.loadGame = function (entity) {
+            $gameRest.get(entity.Id).success(function (data, status, headers, config) {
+                $scope.gv = data;
+            }).error(function (data, status, headers, config) {
+                $scope.error = data;
+            });
+        };
+
+        $scope.deleteGame = function (entity) {
+            $gameRest.delete(entity.Id).success(function (data, status, headers, config) {
+                if (data == "true")
+                {
+                    if (entity.Id == $scope.gv.Id) {
+                        $scope.gv = nothing;
+                    }
+
+                    $scope.loadGames();
+                    error = "Successfully deleted game: " & entity.Id;
                 }
             }).error(function (data, status, headers, config) {
                 $scope.error = data;

@@ -33,14 +33,12 @@ namespace GameLogic.Game
         private IPlayerManager _playerManager;
         private IDecisionMakerManager _decisionMakerManager;
         private IGameViewManager _gameViewManager;
-        private IGameStateManager _gameStateManager;
         private IGameUtilities _gameUtilities;
 
         public GameManager(
             ICardManager<IMonsterCard> monsterCardManager,
             ICardManager<IPlayerCard> playerCardManager,
             IPlayerManager playerManager,
-            IGameStateManager gameStateManager,
             IDecisionMakerManager decisionMakerManager,
             IGameViewManager gameViewManager,
             IGameUtilities gameUtilities)
@@ -48,7 +46,6 @@ namespace GameLogic.Game
             _monsterCardManager = monsterCardManager;
             _playerCardManager = playerCardManager;
             _playerManager = playerManager;
-            _gameStateManager = gameStateManager;
             _decisionMakerManager = decisionMakerManager;
             _gameViewManager = gameViewManager;
             _gameUtilities = gameUtilities;

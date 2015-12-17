@@ -43,12 +43,13 @@ define(['angular', 'nggrid', 'app/config', 'services/gameRest', 'services/cards'
 
                 for (var p in $scope.gv.Players) {
                     var h = connection.initialize($scope.gv.Id, $scope.gv.Players[p].User.Id);
-                    var playerEvent =
-                    {
-                        Action: '1',
-                        Cards: []
-                    };
-                    // h.SendMessageFromClient(playerEvent);
+                    h.connection.start().done(function () {
+                            console.log('Now connected, connection ID=' + $.connection.hub.id);
+                            h.connected();
+                        })
+                        .fail(function(){ console.log('Could not Connect!'); });
+
+
                     $scope.hubs.push(h);
 
                 }
@@ -61,7 +62,11 @@ define(['angular', 'nggrid', 'app/config', 'services/gameRest', 'services/cards'
                         Action: '1',
                         Cards: []
                     };
-            $scope.hubs[0].SendMessageFromClient(playerEvent);
+            $scope.hubs[0].send(playerEvent);
+        };
+
+        $scope.ClientTest = function () {
+            $http({ method: 'GET', url: 'api/game/clienttest' });
         };
 
         $scope.showcards = function()

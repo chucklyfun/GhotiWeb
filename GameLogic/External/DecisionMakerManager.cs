@@ -36,28 +36,31 @@ namespace GameLogic.External
     {	
 	    IDictionary<IPlayer, GameView > PlayerState{get;set;}
 	
-	    IDictionary<string, IDecisionMaker> DecisionMakers {get;set;}
+	    IDictionary<ObjectId, IDecisionMaker> DecisionMakers {get;set;}
 	    bool ProcessGameView(GameView gv);
         void PlayerEvent(PlayerEventArgs eventArgs);
     }
 
-    public class DecisionMakerManager
+    public class DecisionMakerManager : IDecisionMakerManager
     {
 	    private IPlayerManager _playerManager;
-	    private IGameViewManager _gameViewManager;
-	    private IGameManager _gameManager;
-	    private IGameStateManager _gameStateManager;
 	
-	    public DecisionMakerManager (IPlayerManager playerManager, IGameManager gameManager, IGameViewManager gameViewManager, IGameStateManager gameStateManager)
+	    public DecisionMakerManager (IPlayerManager playerManager)
 	    {
             DecisionMakers = new Dictionary<ObjectId, IDecisionMaker>();
 		    _playerManager = playerManager;
-		    _gameManager = gameManager;
-		    _gameViewManager = gameViewManager;		
-		    _gameStateManager = gameStateManager;
 	    }
-	
-	    public IDictionary<ObjectId, IDecisionMaker> DecisionMakers {get;set;}
+
+        public IDictionary<IPlayer, GameView> PlayerState { get; set; }
+        public IDictionary<ObjectId, IDecisionMaker> DecisionMakers { get; set; }
+        public bool ProcessGameView(GameView gv)
+        {
+            return true;
+        }
+        public void PlayerEvent(PlayerEventArgs eventArgs)
+        {
+            
+        }
 	
 	    public bool SendGameView(GameView gv)
 	    {

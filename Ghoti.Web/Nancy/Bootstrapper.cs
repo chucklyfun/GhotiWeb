@@ -17,6 +17,11 @@ using Utilities;
 using Nancy;
 using Nancy.Serialization.JsonNet;
 using GameLogic.External;
+using GameLogic.Player;
+using GameLogic.Deck;
+using System.Reflection;
+using MongoDB.Bson.Serialization;
+
 
 namespace Ghoti.Web.Nancy
 {
@@ -41,6 +46,16 @@ namespace Ghoti.Web.Nancy
             kernel.Rebind<IRepository<User>>().To<MongoDbRepository<User>>().InSingletonScope();
             kernel.Rebind<IRepository<Game>>().To<MongoDbRepository<Game>>().InSingletonScope();
             kernel.Rebind<IRepository<Configuration>>().To<MongoDbRepository<Configuration>>().InSingletonScope();
+            kernel.Rebind<IDecisionMakerManager>().To<DecisionMakerManager>().InSingletonScope();
+            kernel.Rebind<IGameManager>().To<GameManager>().InSingletonScope();
+            kernel.Rebind<IPlayerManager>().To<PlayerManager>().InSingletonScope();
+            kernel.Rebind<IGameViewManager>().To<GameViewManager>().InSingletonScope();
+            kernel.Rebind<IGameStateManager>().To<GameStateManager>().InSingletonScope();
+            kernel.Rebind<ICardManager<IMonsterCard>>().To<CardManager<IMonsterCard>>().InSingletonScope();
+            kernel.Rebind<ICardManager<IPlayerCard>>().To<CardManager<IPlayerCard>>().InSingletonScope();
+            kernel.Rebind<ICardUtilities<IPlayerCard>>().To<CardUtilities<IPlayerCard>>().InSingletonScope();
+            kernel.Rebind<ICardUtilities<IMonsterCard>>().To<CardUtilities<IMonsterCard>>().InSingletonScope();
+            kernel.Rebind<IGameUtilities>().To<GameUtilities>().InSingletonScope();
 
             kernel.Bind<IConnectionStringProvider>().To<AppConfigConnectionStringProvider>().WithConstructorArgument("connectionStringName", "local");
 
@@ -48,6 +63,14 @@ namespace Ghoti.Web.Nancy
 
             kernel.Bind<ISignalRDecisionConnection>().To<SignalRDecisionConnection>();
             kernel.Bind<ISignalRDecisionConnectionFactory>().ToFactory();
+
+
+            var types = Assembly.GetAssembly(typeof(Game))
+                    .GetTypes()
+                    .Where(type => type.IsSubclassOf(typeof(EntityBase)));
+            foreach (var t in types)
+                BsonClassMap.LookupClassMap(t);
+
         }
     }
 }

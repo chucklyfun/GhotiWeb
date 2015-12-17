@@ -16,7 +16,7 @@ namespace GameLogic.External
     }
 
 
-    public class GameViewManager
+    public class GameViewManager : IGameViewManager
     {
         private IPlayerManager _playerManager;
         private IDecisionMakerManager _decisionMakerManager;

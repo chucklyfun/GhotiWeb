@@ -7,7 +7,7 @@ using Utilities.Data;
 
 namespace GameLogic.Player
 {
-    public interface IPlayer
+    public interface IPlayer : IEntity
     {
         string Name { get; set; }
         int PlayerNumber { get; set; }
@@ -32,7 +32,7 @@ namespace GameLogic.Player
         int CalculatePlayerHold();
     }
 
-    public class Player : IPlayer
+    public class Player : EntityBase, IPlayer
     {
         public Player()
         {

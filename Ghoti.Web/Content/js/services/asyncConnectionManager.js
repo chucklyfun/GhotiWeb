@@ -6,23 +6,15 @@ define(['angular', 'angularsignalr'], function (angular, angularsignalr) {
         return {
             initialize: function(gameId, playerId)
             {
-                var hub = new Hub('GameHub',
+                var hub = new Hub('gamehub',
                 {
-                    listeners:
-                    {
-                        'SendMessageFromServer': function (gameEvent)
-                        {
-                            $rootScope.Message = SendMessageFromServer(gameEvent);
-                        }
-                    },
-                    methods: ['SendMessageFromClient'],
+                    methods: ['send', 'connected'],
                     queryParams: {
                         'gameId': gameId,
                         'playerId': playerId
                     },
                     logging : true,
                     useSharedConnection : false
-
                 });
 
                 return hub;
