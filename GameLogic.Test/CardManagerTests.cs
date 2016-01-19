@@ -20,23 +20,23 @@ namespace GameLogic.Test
         [Test]
         public void Can_draw_card()
         {
-            var game = testKernel.Get<Game.Game>();
-            var cardManager = testKernel.Get<CardManager<IPlayerCard>>();
-            var cardUtilitiesMock = testKernel.GetMock<ICardUtilities<IPlayerCard>>();
+            var game = testKernel.Get<Domain.Game>();
+            var cardManager = testKernel.Get<CardManager<Domain.PlayerCard>>();
+            var cardUtilitiesMock = testKernel.GetMock<ICardUtilities<Domain.PlayerCard>>();
 
-            
-            var deck = new Deck<IPlayerCard>();
 
-            var card1 = testKernel.GetMock<IPlayerCard>();
+            var deck = new Deck<Domain.PlayerCard>();
+
+            var card1 = testKernel.GetMock<Domain.PlayerCard>();
             deck.DrawPile.Push(card1.Object);
 
-            var card2 = testKernel.GetMock<IPlayerCard>();
+            var card2 = testKernel.GetMock<Domain.PlayerCard>();
             deck.DrawPile.Push(card2.Object);
 
-            var card3 = testKernel.GetMock<IPlayerCard>();
+            var card3 = testKernel.GetMock<Domain.PlayerCard>();
             deck.DrawPile.Push(card3.Object);
 
-            var card4 = testKernel.GetMock<IPlayerCard>();
+            var card4 = testKernel.GetMock<Domain.PlayerCard>();
             deck.DrawPile.Push(card4.Object);
 
             Assert.AreEqual(card4.Object, cardManager.DrawCard(game, deck));
@@ -50,24 +50,24 @@ namespace GameLogic.Test
         [Test]
         public void Can_shuffle_on_draw()
         {
-            var game = testKernel.Get<Game.Game>();
-            var cardManager = testKernel.Get<CardManager<IPlayerCard>>();
+            var game = testKernel.Get<Domain.Game>();
+            var cardManager = testKernel.Get<CardManager<Domain.PlayerCard>>();
 
-            var cardUtilitiesMock = testKernel.GetMock<ICardUtilities<IPlayerCard>>();
+            var cardUtilitiesMock = testKernel.GetMock<ICardUtilities<Domain.PlayerCard>>();
 
 
-            var deck = new Deck<IPlayerCard>();
+            var deck = new Deck<Domain.PlayerCard>();
 
-            var card1 = testKernel.GetMock<IPlayerCard>();
+            var card1 = testKernel.GetMock<Domain.PlayerCard>();
             deck.DiscardPile.Add(card1.Object);
 
-            var card2 = testKernel.GetMock<IPlayerCard>();
+            var card2 = testKernel.GetMock<Domain.PlayerCard>();
             deck.DiscardPile.Add(card2.Object);
 
-            var card3 = testKernel.GetMock<IPlayerCard>();
+            var card3 = testKernel.GetMock<Domain.PlayerCard>();
             deck.DiscardPile.Add(card3.Object);
 
-            var card4 = testKernel.GetMock<IPlayerCard>();
+            var card4 = testKernel.GetMock<Domain.PlayerCard>();
             deck.DiscardPile.Add(card4.Object);
 
             cardManager.DrawCard(game, deck);

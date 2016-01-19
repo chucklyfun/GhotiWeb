@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using GameLogic.User;
 using GameLogic.Game;
 using PagedList;
 using Utilities.Data;
@@ -11,6 +10,7 @@ using Microsoft.AspNet.SignalR;
 using GameLogic.External;
 using System.Threading.Tasks;
 using Ninject;
+using GameLogic.Domain;
 
 
 namespace ghoti.web.Controllers
@@ -21,32 +21,50 @@ namespace ghoti.web.Controllers
     {
         private IDecisionMakerManager _decisionMakerManager{ get; set; }
         private ISignalRDecisionConnectionFactory _signalRDecisionConnectionFactory { get; set; }
-        private IList<ISignalRDecisionConnection> _connections { get; set; }
         private ISerializationService _serializationService { get; set; }
-
-
+        
         public Gamehub()
         {
             _decisionMakerManager = Ghoti.Web.Nancy.Bootstrapper.Kernel.Get<IDecisionMakerManager>();
             _signalRDecisionConnectionFactory = Ghoti.Web.Nancy.Bootstrapper.Kernel.Get<ISignalRDecisionConnectionFactory>();
-            PlayerEvent += _decisionMakerManager.PlayerEvent;
-
-            _connections = new List<ISignalRDecisionConnection>();
+            
+            _decisionMakerManager.UpdatedViewEvent += decisionMakerManager_UpdatedView;
         }
 
+        public void decisionMakerManager_UpdatedView(object sender, ViewEventArgs eventArgs)
+        {
+            var decisionMakers = _decisionMakerManager.GetOrInsertDecisionMakers(eventArgs.GameId, eventArgs.PlayerId, ConnectionType.SignalR);
 
-        public PlayerEventHandler PlayerEvent { get; set; }
+            foreach(var decisionMaker in decisionMakers)
+            {
+                SendMessageFromServer(_serializationService.Serialize(eventArgs.View), decisionMaker.Id.ToString());
+            }
+            
+        }
 
         public void connected()
         {
-            string name = Context.User.Identity.Name;
+            System.Console.WriteLine("OnConnected");
+
             var playerId = new ObjectId(Context.QueryString["playerId"]);
             var gameId = new ObjectId(Context.QueryString["gameId"]);
+
+            var decisionMaker = _decisionMakerManager.GetOrInsertDecisionMakers(gameId, playerId, ConnectionType.SignalR, Context.ConnectionId);
+
+
+            base.OnConnected();
         }
 
         public override Task OnConnected()
         {
             System.Console.WriteLine("OnConnected");
+
+            var playerId = new ObjectId(Context.QueryString["playerId"]);
+            var gameId = new ObjectId(Context.QueryString["gameId"]);
+
+            var decisionMaker = _decisionMakerManager.GetOrInsertDecisionMakers(gameId, playerId, ConnectionType.SignalR, Context.ConnectionId);
+
+
             return base.OnConnected();
         }
 
@@ -55,23 +73,15 @@ namespace ghoti.web.Controllers
             Clients.Client(connectionId).SendMessage(message);
         }
 
-        public Tuple<ObjectId, ObjectId> GetConnectionIds()
+        public void send(ClientPlayerEventArgs eventArgs)
         {
-            var playerId = new ObjectId(Context.QueryString["playerId"]);
-            var gameId = new ObjectId(Context.QueryString["gameId"]);
+            var decisionMaker = _decisionMakerManager.GetDecisionMaker(ConnectionType.SignalR, Context.ConnectionId);
 
-            return new Tuple<ObjectId, ObjectId>(gameId, playerId);
-        }
-
-        public void send(PlayerEvent eventArgs)
-        {
-            var connectionId = GetConnectionIds();
-            var playerEventArgs = new PlayerEventArgs()
+            if (decisionMaker != null)
             {
-                GameId = connectionId.Item1,
-                PlayerId = connectionId.Item2,
-                PlayerEvent = eventArgs
-            };
+                
+                _decisionMakerManager.ProcessPlayerEvent(eventArgs, decisionMaker);
+            }
         }
     }
 }

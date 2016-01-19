@@ -50,6 +50,16 @@ define(['angular', 'nggrid', 'app/config', 'services/gameRest', 'services/cards'
             $scope.loadGames();
         };
     
+
+        $scope.createGame = function () {
+            $gameRest.create().success(function (data, status, headers, config) {
+                $scope.games.push(data);
+                $scope.gv = data;
+            }).error(function (data, status, headers, config) {
+                $scope.error = data;
+            });
+        };
+
         $scope.addPlayer = function (entity) {
             $gameRest.addPlayer($scope.gv.Id, entity.Id).success(function (data, status, headers, config) {
                 if (data == "true") {

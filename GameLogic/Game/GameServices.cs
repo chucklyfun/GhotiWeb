@@ -5,27 +5,27 @@ using System.Linq;
 using GameLogic.Player;
 using GameLogic.Deck;
 using GameLogic.External;
-using GameLogic.User;
+using GameLogic.Domain;
 using Utilities.Data;
 
 namespace GameLogic.Game
 {
     public interface IGameServices
     {
-        bool AddPlayer(Game game, User.User user);
+        bool AddPlayer(Domain.Game game, Domain.User user);
 
     }
 
 
     public class GameServices : IGameServices
     {
-        private IRepository<Game> _gameRepository { get; set; }
+        private IRepository<Domain.Game> _gameRepository { get; set; }
 
-        public GameServices(IRepository<Game> gameRepository)
+        public GameServices(IRepository<Domain.Game> gameRepository)
         {
             _gameRepository = gameRepository;
         }
-        public bool AddPlayer(Game game, User.User user)
+        public bool AddPlayer(Domain.Game game, Domain.User user)
         {
             var playerNumber = 1;
             if (game.Players.Any())
@@ -33,7 +33,7 @@ namespace GameLogic.Game
                 playerNumber = game.Players.Max(f => f.PlayerNumber) + 1;
             }
             
-            game.Players.Add(new Player.Player()
+            game.Players.Add(new Domain.Player()
             {
                 User = user,
                 Name = user.UserName,

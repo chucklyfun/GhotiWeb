@@ -1,25 +1,36 @@
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Linq;
+using Utilities.Data.Cache;
+using GameLogic.Data;
+
+using MongoDB.Bson;
 
 namespace GameLogic.Deck
 {
 
     public interface ICardManager<T>
     {
-        T DrawCard(Game.Game game, Deck<T> deck);
+        T DrawCard(Domain.Game game, Deck<T> deck);
         void AddToDiscard(Deck<T> deck, T card);
+
+        T GetCard(GameLogic.Domain.Game game, ObjectId cardId);
     }
 
-    public class CardManager<T> : ICardManager<T> where T : ICard
+    public class CardManager<T> : ICardManager<T> where T : Domain.ICard
     {
+        private IRuntimeCache _cache;
+
+        private ICardLoader _cardLoader;
+
         public CardManager(ICardUtilities<T> cardUtilities)
         {
             _cardUtilities = cardUtilities;
         }
+
         private ICardUtilities<T> _cardUtilities { get; set; }
 
-        public T DrawCard(Game.Game game, Deck<T> deck)
+        public T DrawCard(Domain.Game game, Deck<T> deck)
         {
             T card = default(T);
             if (!deck.DrawPile.Any())
@@ -31,7 +42,7 @@ namespace GameLogic.Deck
             if (deck.DrawPile.Any())
             {
                 card = deck.DrawPile.Pop();
-                card.OnDraw(game);
+
             }
             return card;
         }
@@ -39,6 +50,18 @@ namespace GameLogic.Deck
         public void AddToDiscard(Deck<T> deck, T card)
         {
             deck.DiscardPile.Add(card);
+        }
+
+        public T GetCard(GameLogic.Domain.Game game, ObjectId cardId)
+        {
+            var cardList = _cache.AddOrGetExisting(game.Version + ":PlayerCardDeck", () =>
+            {
+                return _cardLoader.LoadPlayerCardFile("playerCards_" + game.Version + ".csv");
+            }) as IEnumerable<T> ?? new List<T>();
+
+            
+
+            return cardList.FirstOrDefault(f => f.Id.Equals(cardId));
         }
     }
 }

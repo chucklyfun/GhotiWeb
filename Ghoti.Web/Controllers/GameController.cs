@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using GameLogic.User;
 using GameLogic.Game;
 using PagedList;
 using Utilities.Data;
 using MongoDB.Bson;
 using Utilities;
+using GameLogic.Domain;
 
 namespace ghoti.web.Controllers
 {
@@ -71,7 +71,6 @@ namespace ghoti.web.Controllers
                     _gameRepository.RemoveAll();
                     return true;
                 };
-
         }
     }
 }

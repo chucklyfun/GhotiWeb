@@ -7,7 +7,7 @@ namespace GameLogic.Deck
 {
     public interface IPlayStrategy
     {
-        void OnReveal(IPlayer player, IPlayerCard card, Game.Game game, bool actionSide);
+        void OnReveal(Domain.Player player, Domain.PlayerCard card, Domain.Game game, bool actionSide);
     }
 
     public class AttackStrategy : IPlayStrategy
@@ -19,7 +19,7 @@ namespace GameLogic.Deck
             _gameManager = gameManager;
         }
 
-        public void OnReveal(IPlayer player, IPlayerCard card, Game.Game game, bool actionSide)
+        public void OnReveal(Domain.Player player, Domain.PlayerCard card, Domain.Game game, bool actionSide)
         {
             if (actionSide)
             {
@@ -41,7 +41,7 @@ namespace GameLogic.Deck
             _gameManager = gameManager;
         }
 
-        public void OnReveal(IPlayer player, IPlayerCard card, Game.Game game, bool actionSide)
+        public void OnReveal(Domain.Player player, Domain.PlayerCard card, Domain.Game game, bool actionSide)
         {
             if (actionSide)
             {
@@ -63,7 +63,7 @@ namespace GameLogic.Deck
             _gameManager = gameManager;
         }
 
-        public void OnReveal(IPlayer player, IPlayerCard card, Game.Game game, bool actionSide)
+        public void OnReveal(Domain.Player player, Domain.PlayerCard card, Domain.Game game, bool actionSide)
         {
             if (actionSide)
             {

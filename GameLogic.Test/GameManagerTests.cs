@@ -25,13 +25,13 @@ namespace GameLogic.Test
             var gameManager = testKernel.Get<GameManager>();
             var playerManager = testKernel.GetMock<IPlayerManager>();
 
-            var player1 = testKernel.GetMock<IPlayer>();
-            var playerCard1 = testKernel.GetMock<IPlayerCard>();
+            var player1 = testKernel.GetMock<Domain.Player>();
+            var playerCard1 = testKernel.GetMock<Domain.PlayerCard>();
 
-            var player2 = testKernel.GetMock<IPlayer>();
-            var playerCard2 = testKernel.GetMock<IPlayerCard>();
+            var player2 = testKernel.GetMock<Domain.Player>();
+            var playerCard2 = testKernel.GetMock<Domain.PlayerCard>();
 
-            var game = new Game.Game();
+            var game = new Domain.Game();
             gameManager.PlayCardBlind(game, player1.Object, playerCard1.Object, true);
             gameManager.PlayCardBlind(game, player2.Object, playerCard2.Object, false);
 
@@ -50,14 +50,14 @@ namespace GameLogic.Test
         public void Can_reveal()
         {
             var gameManager = testKernel.Get<GameManager>();
-            testKernel.Bind<IPlayer>().To<Player.Player>();
-            var game = new Game.Game();
+            testKernel.Bind<Domain.Player>().To<Domain.Player>();
+            var game = new Domain.Game();
 
-            var player1 = testKernel.Get<Player.IPlayer>();
-            var player2 = testKernel.Get<Player.IPlayer>();
+            var player1 = testKernel.Get<Domain.Player>();
+            var player2 = testKernel.Get<Domain.Player>();
 
-            var player1CardMock = testKernel.GetMock<IPlayerCard>();
-            var player2CardMock = testKernel.GetMock<IPlayerCard>();
+            var player1CardMock = testKernel.GetMock<Domain.PlayerCard>();
+            var player2CardMock = testKernel.GetMock<Domain.PlayerCard>();
 
             game.BlindActions[player1] = player1CardMock.Object;
             game.BlindActions[player2] = player2CardMock.Object;
@@ -67,28 +67,26 @@ namespace GameLogic.Test
 
             gameManager.ProcessReveal(game);
 
-            player1CardMock.Verify(f => f.OnReveal(game, player1, true));
-            player2CardMock.Verify(f => f.OnReveal(game, player2, false));
         }
 
         [Test]
         public void Can_process_draw()
         {
-            var game = new Game.Game();
+            var game = new Domain.Game();
 
             var gameManager = testKernel.Get<GameManager>();
             var gameUtilitiesMock = testKernel.GetMock<IGameUtilities>();
-            var cardManagerMock = testKernel.GetMock<ICardManager<IPlayerCard>>();
+            var cardManagerMock = testKernel.GetMock<ICardManager<Domain.PlayerCard>>();
             gameUtilitiesMock.Setup(f => f.CalculateDrawMax(game)).Returns(2);
-            testKernel.Bind<IPlayer>().To<Player.Player>();            
+            testKernel.Bind<Domain.Player>().To<Domain.Player>();            
 
-            var player1 = testKernel.Get<Player.IPlayer>();
-            var player2 = testKernel.Get<Player.IPlayer>();
-            var player3 = testKernel.Get<Player.IPlayer>();
+            var player1 = testKernel.Get<Domain.Player>();
+            var player2 = testKernel.Get<Domain.Player>();
+            var player3 = testKernel.Get<Domain.Player>();
 
-            var card1Mock = testKernel.GetMock<IPlayerCard>();
-            var card2Mock = testKernel.GetMock<IPlayerCard>();
-            var card3Mock = testKernel.GetMock<IPlayerCard>();
+            var card1Mock = testKernel.GetMock<Domain.PlayerCard>();
+            var card2Mock = testKernel.GetMock<Domain.PlayerCard>();
+            var card3Mock = testKernel.GetMock<Domain.PlayerCard>();
             
             game.DrawActions[player1] = card1Mock.Object;
             game.DrawActions[player2] = card2Mock.Object;
@@ -102,7 +100,7 @@ namespace GameLogic.Test
         [Test]
         public void Can_serialize_user()
         {
-            var user = new User.User()
+            var user = new Domain.User()
             {
                 Id = new ObjectId("TestId"),
                 Email = "TestEmail",

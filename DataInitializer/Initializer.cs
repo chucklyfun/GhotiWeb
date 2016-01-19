@@ -3,12 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using GameLogic.Game;
-using GameLogic.User;
 using Utilities.Data;
+using GameLogic.Domain;
 
 namespace DataInitializer
 {
-    public class Initializer
+    public interface IInitializer
+    {
+        void InitializeAdminUser();
+
+        void InitializePlayers(int count);
+    }
+
+    public class Initializer : IInitializer
     {
         public IRepository<User> _userRepository;
 

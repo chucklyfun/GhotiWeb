@@ -9,32 +9,34 @@ define(['angular', 'nggrid', 'app/config', 'services/gameRest', 'services/cards'
         $scope.global = Global;
 
         $scope.init = function () {
-            $scope.GameActions = {
-                'Wait' : {
+            $scope.GameActions = [
+                {
                     Text : 'Wait',
                     Value : 1
                 },
-                'DrawAndDiscard' : {
+                {
                     Text : 'DrawAndDiscard',
                     Value : 2
                 },
-                'PlayAction' : {
+                {
                     Text : 'PlayAction',
                     Value : 3
                 },
-                'PlayEquipment' : {
+                {
                     Text : 'PlayEquipment',
                     Value : 4
                 },
-                'ViewEquipment' : {
+                {
                     Text : 'ViewEquipment',
                     Value : 5
                 },
-                'ViewHand': {
+                {
                     Text: 'ViewHand',
                     Value: 6
                 }
-            };
+            ];
+
+            $scope.CurrentAction = $scope.GameActions[0];
 
             $gameRest.get($routeParams.id).success(function (data)
             {

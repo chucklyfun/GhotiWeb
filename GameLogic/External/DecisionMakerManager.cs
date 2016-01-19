@@ -1,97 +1,198 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using GameLogic.Domain;
 using GameLogic.Player;
 using GameLogic.Game;
+using Utilities.Data;
 using MongoDB.Bson;
+using GameLogic.Deck;
 
 namespace GameLogic.External
 {
-    public delegate void GameEventHandler(object sender, GameEventArgs e);
-    public delegate void PlayerEventHandler(PlayerEventArgs e);
-
-    public class GameEventArgs : EventArgs
-    {
-	    public GameView GameView{ get; set; }
-    }
-    
-    public class PlayerEvent
-    {
-        public ExternalAction Action { get; set; }
-
-        public IList<ObjectId> Cards { get; set; }
-    }
-
-    public class PlayerEventArgs
-    {
-        public ObjectId PlayerId { get; set; }
-
-        public ObjectId GameId { get; set; }
-
-        public PlayerEvent PlayerEvent { get; set; }
-    }
+    public delegate void UpdatedViewEvent(object sender, ViewEventArgs eventArgs);
 
     public interface IDecisionMakerManager
     {	
-	    IDictionary<IPlayer, GameView > PlayerState{get;set;}
-	
-	    IDictionary<ObjectId, IDecisionMaker> DecisionMakers {get;set;}
-	    bool ProcessGameView(GameView gv);
-        void PlayerEvent(PlayerEventArgs eventArgs);
+        event UpdatedViewEvent UpdatedViewEvent;
+        
+        IList<DecisionMaker> GetDecisionMakers(ObjectId gameId, ObjectId playerId);
+
+        DecisionMaker GetDecisionMaker(ConnectionType connectionType, string connectionId);
+
+        List<DecisionMaker> GetOrInsertDecisionMakers(ObjectId gameId, ObjectId playerId, ConnectionType connectionType, string connectionId = "");
+
+        bool ClearAllConnections();
+
+        void ProcessPlayerEvent(ClientPlayerEventArgs playerEvent, DecisionMaker decisionMaker);
+    }
+
+    public class ViewEventArgs : EventArgs
+    {
+        public ObjectId GameId { get; set; }
+
+        public ObjectId PlayerId { get; set; }
+
+        public IView View { get; set; }
     }
 
     public class DecisionMakerManager : IDecisionMakerManager
     {
 	    private IPlayerManager _playerManager;
-	
-	    public DecisionMakerManager (IPlayerManager playerManager)
+        private IRepository<DecisionMaker> _decisionMakerRepository;
+        private IRepository<GameLogic.Domain.Game> _gameRepository;
+        private IRepository<GameLogic.Domain.Player> _playerRepository;
+        private IGameManager _gameManager;
+        private IGameViewManager _gameViewManager;
+        private ICardManager<PlayerCard> _playerCardManager;
+        private ICardManager<MonsterCard> _monsterCardManager;
+
+	    public DecisionMakerManager (IPlayerManager playerManager, IRepository<DecisionMaker> decisionMakerRepository, IRepository<GameLogic.Domain.Game> gameRepository, IGameManager gameManager, ICardManager<PlayerCard> playerCardManager, ICardManager<MonsterCard> monsterCardManager, IGameViewManager gameViewManager)
 	    {
-            DecisionMakers = new Dictionary<ObjectId, IDecisionMaker>();
 		    _playerManager = playerManager;
+            _gameViewManager = gameViewManager;
+            _gameRepository = gameRepository;
+            _gameManager = gameManager;
+            _gameViewManager = gameViewManager;
+            _decisionMakerRepository = decisionMakerRepository;
+
+            _playerCardManager = playerCardManager;
+            _monsterCardManager = monsterCardManager;
+
+            _gameViewManager.UpdatedGameView += _gameViewManager_UpdatedGameView;
 	    }
 
-        public IDictionary<IPlayer, GameView> PlayerState { get; set; }
-        public IDictionary<ObjectId, IDecisionMaker> DecisionMakers { get; set; }
-        public bool ProcessGameView(GameView gv)
+
+        public event UpdatedViewEvent UpdatedViewEvent;
+
+        public void _gameViewManager_UpdatedGameView(object sender, GameViewEventArgs eventArgs)
         {
+            if (UpdatedViewEvent != null)
+            {
+                foreach (var player in eventArgs.Game.Players)
+                {
+                    UpdatedViewEvent(this, new ViewEventArgs()
+                    {
+                        GameId = eventArgs.Game.Id,
+                        PlayerId = player.Id,
+                        View = CreateGameView(eventArgs.Game, player)
+                    });
+                }
+            }
+        }
+
+        public IList<DecisionMaker> GetDecisionMakers(ObjectId gameId, ObjectId playerId)
+        {
+            return _decisionMakerRepository.AsQueryable()
+                .Where(f => f.GameId.Equals(gameId) && f.PlayerId.Equals(playerId)).ToList();
+        }
+
+        public DecisionMaker GetDecisionMaker(ConnectionType connectionType, string connectionId)
+        {
+            return _decisionMakerRepository.AsQueryable()
+                .Where(f => f.ConnectionType == connectionType && f.ConnectionId.Equals(connectionId)).FirstOrDefault();
+        }
+
+        public List<DecisionMaker> GetOrInsertDecisionMakers(ObjectId gameId, ObjectId playerId, ConnectionType connectionType, string connectionId)
+        {
+            var result = GetDecisionMakers(gameId, playerId).ToList();
+
+            if (result == null || !result.Any())
+            {
+                var decisionMaker = new DecisionMaker()
+                {
+                    GameId = gameId,
+                    PlayerId = playerId,
+                    ConnectionId = connectionId,
+                    ConnectionType = connectionType
+                };
+
+                _decisionMakerRepository.Insert(decisionMaker);
+
+                result.Add(decisionMaker);
+            }
+
+            return result;
+        }
+
+        public bool ClearAllConnections()
+        {
+            _decisionMakerRepository.RemoveAll();
             return true;
         }
-        public void PlayerEvent(PlayerEventArgs eventArgs)
+
+        public GameView CreateGameView(Domain.Game game, Domain.Player p)
         {
-            
+            var result = new GameView();
+            foreach (var card in p.Hand)
+            {
+                result.CardIds.Add(card.Id);
+            }
+
+            result.CurrentPlayer = CreatePlayerView(p);
+            foreach (Domain.Player op in game.Players.Where(f => f.User.Id != p.User.Id))
+            {
+                result.OtherPlayers.Add(CreatePlayerView(op));
+            }
+            result.CurrentPlayer = CreatePlayerView(p);
+            return result;
         }
-	
-	    public bool SendGameView(GameView gv)
-	    {
-		    var result = true;
-		
-		    IDecisionMaker d = null;
-		    if (DecisionMakers.TryGetValue(gv.CurrentPlayer.PlayerId, out d))
-		    {
-			    d.SendGameView(gv);
-		    }
-		    else
-		    {
-			    result = false;
-		    }
-		    return result;
-	    }
-	
-	    public bool ProcessGameAction(GameView gv)
-	    {
-		    var result = true;
-		
-		    IDecisionMaker d = null;
-		    if (DecisionMakers.TryGetValue(gv.CurrentPlayer.PlayerId, out d))
-		    {
-                d.SendGameView(gv);
-		    }
-		    else
-		    {
-			    result = false;
-		    }
-		    return result;
-	    }
+
+        public PlayerView CreatePlayerView(Domain.Player p)
+        {
+            var pv = new PlayerView();
+            pv.HandSize = p.Hand.Count();
+            pv.PlayerAttack = _playerManager.CalculatePlayerAttack(p);
+            pv.PlayerHold = _playerManager.CalculatePlayerHold(p);
+            pv.PlayerDraw = _playerManager.CalculatePlayerDraw(p);
+            pv.PlayerKeep = _playerManager.CalculatePlayerKeep(p);
+            pv.PlayerSpeed = _playerManager.CalculatePlayerSpeed(p);
+
+            return pv;
+        }
+
+        public GameView CreateEquipmentView(Domain.Game game, Domain.Player currentPlayer, Domain.Player targetPlayer)
+        {
+            var gv = CreateGameView(game, currentPlayer);
+            foreach (var card in targetPlayer.Equipment)
+            {
+                gv.CardIds.Add(card.Id);
+            }
+
+            return gv;
+        }
+
+
+        public void ProcessPlayerEvent(ClientPlayerEventArgs eventArgs, DecisionMaker decisionMaker)
+        {
+            var game = _gameRepository.GetById(decisionMaker.GameId);
+            var player = game.Players.FirstOrDefault(f => f.Id.Equals(decisionMaker.PlayerId));
+            
+            if (game != null && player != null)
+            {
+                if (eventArgs.Action == ClientToServerAction.StartGame)
+                {
+                    // initialize the game if it isn't already
+                }
+                else if (eventArgs.Action == ClientToServerAction.PlayEquipment)
+                {
+                    var card = _playerCardManager.GetCard(game, eventArgs.Cards.FirstOrDefault());
+
+                    if (card != null)
+                    {
+                        _gameManager.PlayCardBlind(game, player, card, false);
+                    }                    
+                }
+                else if (eventArgs.Action == ClientToServerAction.PlayAction)
+                {
+                    var card = _playerCardManager.GetCard(game, eventArgs.Cards.FirstOrDefault());
+
+                    if (card != null)
+                    {
+                        _gameManager.PlayCardBlind(game, player, card, true);
+                    }                    
+                }
+            }
+        }    
     }
 }

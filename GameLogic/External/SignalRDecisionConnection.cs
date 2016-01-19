@@ -5,15 +5,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Utilities;
+using GameLogic.Domain;
 
 namespace GameLogic.External
 { 
     public interface ISignalRDecisionConnection
     {
-        string ConnectionId {get;set;}
-        string ConnectionName {get;set;}
-        ObjectId PlayerId {get;set;}
-        ObjectId GameId {get;set;}
+        DecisionMaker DecisionMaker { get; set; }
+
+        string ConnectionName { get; set; }
     }
 
     public interface ISignalRDecisionConnectionFactory
@@ -26,21 +26,26 @@ namespace GameLogic.External
         private ISerializationService _serializationService;
         private IDecisionMakerManager _decisionMakerManager;
 
-        public string ConnectionId {get;set;}
+        public DecisionMaker DecisionMaker { get; set; }
+
         public string ConnectionName {get;set;}
-        public ObjectId PlayerId {get;set;}
-        public ObjectId GameId { get; set; }
+
+
 
         public SignalRDecisionConnection(ISerializationService serializationService, IDecisionMakerManager decisionMakerManager, string connectionId, string connectionName, ObjectId playerId, ObjectId gameId)
         {
             _serializationService = serializationService;
             _decisionMakerManager = decisionMakerManager;
-            ConnectionId = connectionId;
+            
             ConnectionName = connectionName;
-            PlayerId = playerId;
-            GameId = gameId;
+
+            DecisionMaker = new DecisionMaker()
+            {
+                ConnectionType = ConnectionType.SignalR,
+                GameId = gameId,
+                Id = new ObjectId(connectionId),
+                PlayerId = playerId
+            };
         }
-
-
     }
 }

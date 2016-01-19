@@ -5,107 +5,147 @@ using System.Linq;
 using GameLogic.Player;
 using GameLogic.Deck;
 using GameLogic.External;
+using GameLogic.Domain;
 
 namespace GameLogic.Game
 {
     public interface IGameManager
     {
-        void PlayCardBlind(Game g, IPlayer player, IPlayerCard card, bool facing);
-        bool CanReveal(Game g);
-        void ProcessReveal(Game g);
+        void PlayCardBlind(Domain.Game g, Domain.Player player, Domain.PlayerCard card, bool facing);
+        bool CanReveal(Domain.Game g);
+        void ProcessReveal(Domain.Game g);
 
-        void ProcessTurnStart(Game g);
-        void ProcessDraw(Game g);
-        void ProcessEquip(Game g);
-        void ProcessAmbush(Game g);
-        void ProcessKeep(Game g, IPlayer player, IList<IPlayerCard> cards);
-        void ProcessAttack(Game g, IDictionary<IPlayer, int> attackTotals);
-        void ProcessAmbushAttackActions(Game g);
+        void ProcessTurnStart(Domain.Game g);
+        void ProcessDraw(Domain.Game g);
+        void ProcessEquip(Domain.Game g);
+        void ProcessAmbush(Domain.Game g);
+        void ProcessKeep(Domain.Game g, Domain.Player player, IList<Domain.PlayerCard> cards);
+        void ProcessAttack(Domain.Game g, IDictionary<Domain.Player, int> attackTotals);
+        void ProcessAmbushAttackActions(Domain.Game g);
 
-        void AddCardToQueue(Game game, IMonsterCard monsterCard);
+        void AddCardToQueue(Domain.Game game, Domain.MonsterCard monsterCard);
+
+        
+        void PlayerPlaysEquipment(Domain.Game game, Domain.Player player, Domain.PlayerCard card);
+
+        void PlayerPlaysAction(Domain.Game game, Domain.Player player, Domain.PlayerCard card);
     }
 
 
     public class GameManager : IGameManager
     {
-        private ICardManager<IMonsterCard> _monsterCardManager;
-        private ICardManager<IPlayerCard> _playerCardManager;
+        private ICardManager<Domain.MonsterCard> _monsterCardManager;
+        private ICardManager<Domain.PlayerCard> _playerCardManager;
         private IPlayerManager _playerManager;
-        private IDecisionMakerManager _decisionMakerManager;
-        private IGameViewManager _gameViewManager;
         private IGameUtilities _gameUtilities;
+        private IGameViewManager _gameViewManager;
 
         public GameManager(
-            ICardManager<IMonsterCard> monsterCardManager,
-            ICardManager<IPlayerCard> playerCardManager,
+            ICardManager<Domain.MonsterCard> monsterCardManager,
+            ICardManager<Domain.PlayerCard> playerCardManager,
             IPlayerManager playerManager,
-            IDecisionMakerManager decisionMakerManager,
-            IGameViewManager gameViewManager,
-            IGameUtilities gameUtilities)
+            IGameUtilities gameUtilities,
+            IGameViewManager gameViewManager)
         {
             _monsterCardManager = monsterCardManager;
             _playerCardManager = playerCardManager;
             _playerManager = playerManager;
-            _decisionMakerManager = decisionMakerManager;
             _gameViewManager = gameViewManager;
             _gameUtilities = gameUtilities;
         }
 
-        public bool InitializeGame(Game game)
+        public bool InitializeGame(Domain.Game game)
         {
             var result = false;
 
             return result;
         }
 
-        public Game CreateGame()
+        public Domain.Game CreateGame()
         {
-            return new Game();
+            return new Domain.Game();
         }
 
-        public void ProcessTurnStart(Game game)
+        public void ProcessTurnStart(Domain.Game game)
         {
-            foreach (IPlayer p in _playerManager.Players)
+            _gameViewManager.OnUpdatedGameView(this, new GameViewEventArgs()
             {
-                var gv = _gameViewManager.CreateGameView(p);
-                gv.CurrentAction = External.ExternalAction.PlayAction;
-                _decisionMakerManager.ProcessGameView(gv);
-            }
+                Game = game,
+                Action = Domain.ServerToClientAction.PlayBlind
+            });
         }
 
-        public void AddCardToQueue(Game game, IMonsterCard monsterCard)
+        public void PlayerPlaysEquipment(Domain.Game game, Domain.Player player, Domain.PlayerCard card)
+        {
+            game.BlindActions[player] = card;
+            game.ActionSide[player] = false;
+        }
+
+        public void PlayerPlaysAction(Domain.Game game, Domain.Player player, Domain.PlayerCard card)
+        {
+            game.BlindActions[player] = card;
+            game.ActionSide[player] = true;
+        }
+
+        public void AddCardToQueue(Domain.Game game, Domain.MonsterCard monsterCard)
         {
             game.MonsterQueue.Enqueue(monsterCard);
-            monsterCard.OnAddToQueue(game);
         }
 
-        public void PlayCardBlind(Game game, IPlayer player, IPlayerCard card, bool facing)
+        public void PlayCardBlind(Domain.Game game, Domain.Player player, Domain.PlayerCard card, bool actionSide)
         {
             game.BlindActions.Add(player, card);
-            game.ActionSide[player] = facing;
+            game.ActionSide[player] = actionSide;
 
-            _gameViewManager.SendHandView(player, ExternalAction.Wait);
+            _gameViewManager.OnUpdatedPlayerView(this, new ServerPlayerEventArgs()
+            {
+                Action = Domain.ServerToClientAction.Wait,
+                Cards = player.Hand,
+                Player = player,
+                GameId = game.Id
+            });
         }
 
-        public bool CanReveal(Game game)
+        public bool CanReveal(Domain.Game game)
         {
             return game.Players.Count == game.BlindActions.Count;
         }
 
-        public void ProcessReveal(Game game)
+        public void ProcessReveal(Domain.Game game)
         {
             foreach (var action in game.BlindActions)
             {
                 bool v;
                 if (game.ActionSide.TryGetValue(action.Key, out v))
                 {
-                    action.Value.OnReveal(game, action.Key, v);
+                    var card = action.Value;
+
+                    if (v)
+                    {
+                        if (card.ActionType == Domain.ActionType.Draw)
+                        {
+                            game.DrawActions.Add(action.Key, card);
+                        }
+                        else if (card.ActionType == Domain.ActionType.Attack)
+                        {
+                            game.AttackActions.Add(action.Key, card);
+                        }
+                        else if (card.ActionType == Domain.ActionType.Ambush)
+                        {
+                            game.AmbushActions.Add(action.Key, card);
+                        }
+                    }
+                    else
+                    {
+                        game.EquipActions.Add(action.Key, card);
+                    }
                 }
+                
             }
             game.BlindActions.Clear();
         }
 
-        public void ProcessDraw(Game game)
+        public void ProcessDraw(Domain.Game game)
         {
             // Calculate draw and keep value
             var drawMax = _gameUtilities.CalculateDrawMax(game);
@@ -121,7 +161,7 @@ namespace GameLogic.Game
                 }
             }
 
-            var otherPlayers = new List<IPlayer>();
+            var otherPlayers = new List<Domain.Player>();
             foreach (var kvp in game.AttackActions)
             {
                 otherPlayers.Add(kvp.Key);
@@ -140,24 +180,38 @@ namespace GameLogic.Game
                 if (null != card)
                 {
                     p.DrawCards.Add(card);
-                }
-                
+                }                
             }
+
+            foreach (var p in game.Players)
+            {
+                _gameViewManager.OnUpdatedPlayerView(this, new ServerPlayerEventArgs()
+                {
+                    Player = p,
+                    Action = Domain.ServerToClientAction.DrawAndDiscard,
+                    Cards = p.DrawCards
+                });
+            }
+            
         }
 
-        public void ProcessEquip(Game game)
+        public void ProcessEquip(Domain.Game game)
         {
             foreach (var kvp in game.EquipActions)
             {
-                if (kvp.Key.ValidateEquipment(kvp.Value))
+                if (_playerManager.ValidateEquipment(kvp.Key, kvp.Value))
                 {
                     kvp.Key.Equipment.Add(kvp.Value);
-                    var gv = _gameViewManager.CreateGameView(kvp.Key);
-                    gv.CurrentAction = External.ExternalAction.Wait;
-                    _decisionMakerManager.ProcessGameView(gv);
+                    _gameViewManager.OnUpdatedPlayerView(this, new ServerPlayerEventArgs()
+                    {
+                        Action = ServerToClientAction.Wait,
+                        GameId = game.Id,
+                        Player = kvp.Key,
+                        Cards = kvp.Key.Hand
+                    });
                 }
 
-                var otherPlayers = new List<IPlayer>();
+                var otherPlayers = new List<Domain.Player>();
                 foreach (var p in game.AttackActions)
                 {
                     otherPlayers.Add(p.Key);
@@ -172,12 +226,18 @@ namespace GameLogic.Game
                 }
                 foreach (var p in otherPlayers)
                 {
-                    _gameViewManager.SendHandView(p, External.ExternalAction.PlayEquipment);
+                    _gameViewManager.OnUpdatedPlayerView(this, new ServerPlayerEventArgs()
+                        {
+                            Action = Domain.ServerToClientAction.PlayEquipment,
+                            GameId = game.Id,
+                            Player = p,
+                            Cards = p.Hand
+                        });
                 }
             }
         }
 
-        public void ProcessKeep(Game game, IPlayer player, IList<IPlayerCard> keepCards)
+        public void ProcessKeep(Domain.Game game, Domain.Player player, IList<Domain.PlayerCard> keepCards)
         {
             foreach (var card in keepCards)
             {
@@ -187,21 +247,19 @@ namespace GameLogic.Game
                     player.Hand.Add(card);
                 }
             }
-
-            _gameViewManager.SendKeepView(player, External.ExternalAction.PlayEquipment);
         }
 
-        public void ProcessAmbush(Game game)
+        public void ProcessAmbush(Domain.Game game)
         {
             var firstMonster = game.MonsterQueue.FirstOrDefault();
 
             if (null != firstMonster)
             {
                 // The attack has been ambushed! See who gets the ambush.
-                var speeds = new Dictionary<IPlayer, int>();
+                var speeds = new Dictionary<Domain.Player, int>();
                 foreach (var kvp in game.AmbushActions)
                 {
-                    var currentSpeed = kvp.Key.CalculatePlayerSpeed();
+                    var currentSpeed = _playerManager.CalculatePlayerSpeed(kvp.Key);
                     currentSpeed += kvp.Value.ActionSpeedBonus;
                     speeds[kvp.Key] = currentSpeed;
                 }
@@ -218,28 +276,40 @@ namespace GameLogic.Game
                     }
                 }
 
-                _gameViewManager.SendKeepView(fastestAmbush.Key, External.ExternalAction.DrawAndDiscard);
-
-                foreach (var player in _playerManager.Players.Where(f => f != fastestAmbush.Key))
+                _gameViewManager.OnUpdatedPlayerView(this, new ServerPlayerEventArgs()
                 {
-                    _gameViewManager.SendHandView(player, External.ExternalAction.Wait);
+                    GameId = game.Id, 
+                    Player = fastestAmbush.Key,
+                    Action = ServerToClientAction.DrawAndDiscard,
+                    Cards = fastestAmbush.Key.DrawCards
+                });
+
+                foreach (var player in game.Players.Where(f => f != fastestAmbush.Key))
+                {
+                    _gameViewManager.OnUpdatedPlayerView(this, new ServerPlayerEventArgs()
+                    {
+                        GameId = game.Id,
+                        Player = player,
+                        Action = ServerToClientAction.Wait,
+                        Cards = player.Hand
+                    });
                 }
             }
         }
 
-        public void ProcessAttack(Game game, IDictionary<IPlayer, int> attackTotals)
+        public void ProcessAttack(Domain.Game game, IDictionary<Domain.Player, int> attackTotals)
         {
             // The attack has been ambushed! See who gets the ambush.
-            var speeds = new Dictionary<IPlayer, int>();
+            var speeds = new Dictionary<Domain.Player, int>();
             foreach (var kvp in game.AttackActions)
             {
-                var currentSpeed = kvp.Key.CalculatePlayerSpeed();
+                var currentSpeed = _playerManager.CalculatePlayerSpeed(kvp.Key);
                 currentSpeed += kvp.Value.ActionSpeedBonus;
                 speeds[kvp.Key] = currentSpeed;
             }
 
             int totalAttack = 0;
-            var rewards = new Dictionary<IPlayer, int>();
+            var rewards = new Dictionary<Domain.Player, int>();
             var currentMonster = game.MonsterQueue.FirstOrDefault();
 
             var treasures = currentMonster.Treasures.ToList();
@@ -267,12 +337,12 @@ namespace GameLogic.Game
                         game.MonsterQueue.Dequeue();
                         currentMonster = game.MonsterQueue.FirstOrDefault();
                         treasures = currentMonster.Treasures.ToList();
-                        fastestPlayer = default(KeyValuePair<IPlayer, int>);
+                        fastestPlayer = default(KeyValuePair<Domain.Player, int>);
                     }
                 }
             }
 
-            foreach (var player in _playerManager.Players)
+            foreach (var player in game.Players)
             {
                 int rewardValue = 0;
                 if (rewards.TryGetValue(player, out rewardValue))
@@ -285,24 +355,29 @@ namespace GameLogic.Game
                 }
             }
 
-            foreach (var player in _playerManager.Players)
+            foreach (var player in game.Players)
             {
                 game.PlayerReady[player] = true;
-                _gameViewManager.SendHandView(player, External.ExternalAction.Wait);
             }
+
+            _gameViewManager.OnUpdatedGameView(this, new GameViewEventArgs()
+            {
+                Game = game, 
+                Action = ServerToClientAction.Wait
+            });
         }
 
-        public void ProcessAmbushAttackActions(Game game)
+        public void ProcessAmbushAttackActions(Domain.Game game)
         {
             if (0 < game.AmbushActions.Count())
             {
                 var firstMonster = game.MonsterQueue.FirstOrDefault();
 
                 // Calculate Attack Totals
-                var attackTotals = new Dictionary<IPlayer, int>();
+                var attackTotals = new Dictionary<Domain.Player, int>();
                 foreach (var action in game.AttackActions)
                 {
-                    var currentAttack = action.Key.CalculatePlayerAttack();
+                    var currentAttack = _playerManager.CalculatePlayerAttack(action.Key);
                     currentAttack += action.Value.ActionPowerBonus;
                     attackTotals[action.Key] = currentAttack;
                 }

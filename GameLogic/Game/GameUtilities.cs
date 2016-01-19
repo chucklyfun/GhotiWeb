@@ -3,25 +3,32 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using GameLogic.Player;
 
 namespace GameLogic.Game
 {
 
     public interface IGameUtilities
     {
-        int CalculateDrawMax(Game game);
-        int CalculateKeepMax(Game game);
+        int CalculateDrawMax(Domain.Game game);
+        int CalculateKeepMax(Domain.Game game);
     }
 
     public class GameUtilities : IGameUtilities
     {
-        public int CalculateDrawMax(Game game)
+        private IPlayerManager _playerManager;
+        public GameUtilities(IPlayerManager playerManager)
         {
-            return game.DrawActions.Max(f => f.Key.CalculatePlayerDraw() + f.Value.ActionDrawBonus);
+            _playerManager = playerManager;
         }
-        public int CalculateKeepMax(Game game)
+
+        public int CalculateDrawMax(Domain.Game game)
         {
-            return game.DrawActions.Max(f => f.Key.CalculatePlayerKeep() + f.Value.ActionKeepBonus);
+            return game.DrawActions.Max(f =>  _playerManager.CalculatePlayerDraw(f.Key) + f.Value.ActionDrawBonus);
+        }
+        public int CalculateKeepMax(Domain.Game game)
+        {
+            return game.DrawActions.Max(f => _playerManager.CalculatePlayerKeep(f.Key) + f.Value.ActionKeepBonus);
         }
     }
 }

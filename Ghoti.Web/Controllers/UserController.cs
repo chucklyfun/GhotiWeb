@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using GameLogic.User;
 using Utilities;
 using PagedList;
 using MongoDB.Bson;
+using GameLogic.Domain;
 
 namespace ghoti.web.Controllers
 {

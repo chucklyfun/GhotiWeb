@@ -9,18 +9,18 @@ namespace GameLogic.Game
 {
     public class GameStateEventArgs : EventArgs
     {
-        public GameState PreviousGameState { get; set; }
-        public GameState CurrentGameState { get; set; }
-        public Game Game { get; set; }
+        public Domain.GameState PreviousGameState { get; set; }
+        public Domain.GameState CurrentGameState { get; set; }
+        public Domain.Game Game { get; set; }
     }
 
     public delegate void GameStateEventHandler(object sender, GameStateEventArgs e);
 
     public interface IGameStateManager
     {
-        void UnreadyPlayers(Game game);
+        void UnreadyPlayers(Domain.Game game);
 
-        IPlayer CheckWinner(Game game);
+        Domain.Player CheckWinner(Domain.Game game);
 
         event GameStateEventHandler GameStateChanged;
     }
@@ -39,7 +39,7 @@ namespace GameLogic.Game
             _playerManager = playerManager;
         }
 
-        public void UnreadyPlayers(Game game)
+        public void UnreadyPlayers(Domain.Game game)
         {
             foreach (var player in game.Players)
             {
@@ -47,44 +47,44 @@ namespace GameLogic.Game
             }
         }
 
-        public void ProcessState(Game game)
+        public void ProcessState(Domain.Game game)
         {
             if (game.PlayerReady.All(f => f.Value))
             {
-                if (game.CurrentState == GameState.TurnStart)
+                if (game.CurrentState == Domain.GameState.TurnStart)
                 {
-                    game.CurrentState = GameState.PlayBlind;
+                    game.CurrentState = Domain.GameState.PlayBlind;
                     UnreadyPlayers(game);
                     _gameManager.ProcessTurnStart(game);
                 }
-                else if (game.CurrentState == GameState.PlayBlind)
+                else if (game.CurrentState == Domain.GameState.PlayBlind)
                 {
-                    game.CurrentState = GameState.PlayEquip;
+                    game.CurrentState = Domain.GameState.PlayEquip;
                     UnreadyPlayers(game);
                     _gameManager.ProcessEquip(game);
                 }
-                else if (game.CurrentState == GameState.PlayEquip)
+                else if (game.CurrentState == Domain.GameState.PlayEquip)
                 {
-                    game.CurrentState = GameState.PlayAmbushAttack;
+                    game.CurrentState = Domain.GameState.PlayAmbushAttack;
                     UnreadyPlayers(game);
                     _gameManager.ProcessAmbushAttackActions(game);
                     // check win?
                 }
-                else if (game.CurrentState == GameState.PlayAmbushAttack)
+                else if (game.CurrentState == Domain.GameState.PlayAmbushAttack)
                 {
-                    game.CurrentState = GameState.PlayDraw;
+                    game.CurrentState = Domain.GameState.PlayDraw;
                     UnreadyPlayers(game);
                     _gameManager.ProcessDraw(game);
                 }
-                else if (game.CurrentState == GameState.PlayDraw)
+                else if (game.CurrentState == Domain.GameState.PlayDraw)
                 {
-                    game.CurrentState = GameState.TurnStart;
+                    game.CurrentState = Domain.GameState.TurnStart;
                     UnreadyPlayers(game);
                 }
             }
         }
 
-        public void ChangeState(Game game, GameState state)
+        public void ChangeState(Domain.Game game, Domain.GameState state)
         {
             var eventArgs = new GameStateEventArgs()
             {
@@ -97,42 +97,42 @@ namespace GameLogic.Game
             GameStateChanged(this, eventArgs);
         }
 
-        public void StartTurn(Game game)
+        public void StartTurn(Domain.Game game)
         {
-            ChangeState(game, GameState.TurnStart);
+            ChangeState(game, Domain.GameState.TurnStart);
         }
 
-        public void StartPlayBlind(Game game)
+        public void StartPlayBlind(Domain.Game game)
         {
-            ChangeState(game, GameState.PlayBlind);
+            ChangeState(game, Domain.GameState.PlayBlind);
         }
 
-        public void StartReveal(Game game)
+        public void StartReveal(Domain.Game game)
         {
-            ChangeState(game, GameState.Reveal);
+            ChangeState(game, Domain.GameState.Reveal);
         }
 
-        public void StartEquip(Game game)
+        public void StartEquip(Domain.Game game)
         {
-            ChangeState(game, GameState.PlayEquip);
+            ChangeState(game, Domain.GameState.PlayEquip);
         }
 
-        public void StartAmbushAttack(Game game)
+        public void StartAmbushAttack(Domain.Game game)
         {
-            ChangeState(game, GameState.PlayAmbushAttack);
+            ChangeState(game, Domain.GameState.PlayAmbushAttack);
         }
 
-        public void StartDraw(Game game)
+        public void StartDraw(Domain.Game game)
         {
-            ChangeState(game, GameState.PlayDraw);
+            ChangeState(game, Domain.GameState.PlayDraw);
         }
 
-        public IPlayer CheckWinner(Game game)
+        public Domain.Player CheckWinner(Domain.Game game)
         {
-            IPlayer result = null;
-            if (GameState.PlayAmbushAttack == game.CurrentState)
+            Domain.Player result = null;
+            if (Domain.GameState.PlayAmbushAttack == game.CurrentState)
             {
-                var winningPlayers = _playerManager.Players.Where(f => f.Victories >= game.VictoryCondition);
+                var winningPlayers = game.Players.Where(f => f.Victories >= game.VictoryCondition);
                 var winningCount = 0;
                 foreach (var p in winningPlayers)
                 {

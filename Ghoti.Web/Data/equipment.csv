@@ -1,0 +1,46 @@
+name, cardnumber, type, equipmenttext, attack, speed, search, keep, hold, cost
+Horseshoes,1,Shoes,,2,2,0,0,0,4
+Buckets,4,Shoes,,4,0,0,0,0,3
+Stilts,7,Shoes,,0,2,0,0,0,2
+Magical Cape,10,Armor,,4,0,0,0,0,2
+Saddle,13,Armor,,2,0,0,0,2,3
+Cursed Amulet,16,Armor,This armor cannot be replaced.,3,0,0,0,1,2
+Duck,19,Helmet,,2,0,1,0,0,4
+Pony Ears,22,Helmet,,3,0,1,0,0,5
+Fake Beard,25,Helmet,,2,0,1,0,0,6
+Rocket Propelled Chainsaw Launcher,28,Hands,,12,0,0,0,0,9
+Creepy Doll,31,Hands,,1,0,0,2,0,5
+Dictionary,34,Hands,,2,0,1,2,0,6
+Bagpipes,37,Hands,,7,0,0,2,0,9
+Gatling Shotgun,40,Hands,,3,0,0,0,0,8
+Ancient Tuba,43,Hands,,8,0,0,0,0,5
+Socks,2,Shoes,,1,1,0,0,0,6
+Paint Cans,5,Shoes,,3,1,0,0,0,3
+Hover Shoes,8,Shoes,,1,3,0,0,0,5
+Saddle Bags,11,Armor,,2,0,0,0,3,6
+Tortoise Shell,14,Armor,,4,-3,0,0,2,2
+Fancy Dress,17,Armor,,3,0,0,0,3,7
+Fake Unicorn Horn,20,Helmet,,4,0,2,0,0,8
+Bunny Hat,23,Helmet,,2,0,1,0,0,4
+Ribbon,26,Helmet,,4,0,2,0,0,4
+Chainsaw Nunchucks,29,Hands,,9,0,0,1,0,9
+Portable Hole,32,Hands,,4,0,0,1,0,4
+Popsicle,35,Hands,,1,0,0,1,0,7
+Card Game,38,Hands,,9,0,0,2,0,5
+Human Hands,41,Hands,,9,0,0,1,0,7
+Abacus,44,Hands,,3,0,0,0,0,0
+Cute Boots,3,Shoes,,3,4,0,0,0,9
+Chalupas,9,Shoes,,1,1,0,0,0,1
+CD Roms,6,Shoes,,0,1,0,0,0,0
+Mailbox,27,Helmet,,8,0,3,0,0,8
+Flower Hat,21,Helmet,,3,0,1,0,0,5
+Cowpony Hat,24,Helmet,,3,0,2,0,0,7
+Horse Armor,12,Armor,,6,0,0,0,3,9
+Medal Armor,18,Armor,,6,0,0,0,1,3
+Chicken Costume,15,Armor,,1,0,0,0,2,0
+Feather,30,Hands,,7,0,0,1,0,6
+Innocent Bystander,36,Hands,,3,0,0,1,0,2
+Lasso,33,Hands,,1,0,1,1,0,6
+Feather Duster,39,Hands,,2,0,0,2,0,9
+Cider Mug,45,Hands,,4,0,0,1,0,6
+Floss,42,Hands,,3,0,0,1,0,0

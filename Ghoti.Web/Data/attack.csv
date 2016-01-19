@@ -1,0 +1,16 @@
+name, cardnumber, type, equipmenttext, attack, speed, search, keep, hold, cost, actiontitle, actionspeed, actionattack, actionsearch, actionkeep, ambushlimit
+Horseshoes,1,Shoes,,2,2,0,0,0,4,Attack,1,6,0,0,0
+Buckets,4,Shoes,,4,0,0,0,0,3,Attack,2,3,0,0,0
+Stilts,7,Shoes,,0,2,0,0,0,2,Attack,3,1,0,0,0
+Magical Cape,10,Armor,,4,0,0,0,0,2,Attack,1,6,0,0,0
+Saddle,13,Armor,,2,0,0,0,2,3,Attack,2,3,0,0,0
+Cursed Amulet,16,Armor,This armor cannot be replaced.,3,0,0,0,1,2,Attack,3,1,0,0,0
+Duck,19,Helmet,,2,0,1,0,0,4,Attack,1,6,0,0,0
+Pony Ears,22,Helmet,,3,0,1,0,0,5,Attack,2,3,0,0,0
+Fake Beard,25,Helmet,,2,0,1,0,0,6,Attack,3,1,0,0,0
+Rocket Propelled Chainsaw Launcher,28,Hands,,12,0,0,0,0,9,Attack,1,6,0,0,0
+Creepy Doll,31,Hands,,1,0,0,2,0,5,Attack,2,3,0,0,0
+Dictionary,34,Hands,,2,0,1,2,0,6,Attack,3,1,0,0,0
+Bagpipes,37,Hands,,7,0,0,2,0,9,Attack,1,6,0,0,0
+Gatling Shotgun,40,Hands,,3,0,0,0,0,8,Attack,2,3,0,0,0
+Ancient Tuba,43,Hands,,8,0,0,0,0,5,Attack,3,1,0,0,0

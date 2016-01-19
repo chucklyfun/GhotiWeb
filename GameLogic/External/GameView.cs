@@ -2,9 +2,16 @@ using MongoDB.Bson;
 using System;
 using System.Collections.Generic;
 
+using GameLogic.Domain;
+
 namespace GameLogic.External
 {
-    public class GameView
+    public interface IView
+    {
+
+    }
+
+    public class GameView : IView
     {
         public IList<ObjectId> CardIds { get; set; }
         public PlayerView CurrentPlayer { get; set; }
@@ -17,10 +24,10 @@ namespace GameLogic.External
         public IList<ObjectId> OtherEquipmentCardIds { get; set; }
 
 
-        public ExternalAction CurrentAction { get; set; }
+        public ServerToClientAction CurrentAction { get; set; }
     }
 
-    public class PlayerView
+    public class PlayerView : IView
     {
         public ObjectId PlayerId { get; set; }
 
@@ -39,6 +46,6 @@ namespace GameLogic.External
         public ObjectId PlayerId { get; set; }
         public ObjectId TargetPlayerId { get; set; }
         public IList<ObjectId> CardIds { get; set; }
-        public ExternalAction Action { get; set; }
+        public ClientToServerAction Action { get; set; }
     }
 }

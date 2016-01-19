@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Linq;
 using GameLogic.Game;
-using GameLogic.User;
 using NUnit.Framework;
 using Ninject;
-using Ninject.Extensions.Conventions;
 using Utilities.Data;
 using Utilities.Data.MongoDb;
+using GameLogic.Domain;
 
 namespace DataInitializer.Test
 {
@@ -20,12 +19,8 @@ namespace DataInitializer.Test
         {
             IntegrationsKernel = new StandardKernel();
 
-            IntegrationsKernel.Bind(x => x.FromAssemblyContaining<LoremIpsum>().SelectAllClasses().BindDefaultInterface());
-            IntegrationsKernel.Bind(x => x.FromAssemblyContaining<EntityBase>().SelectAllClasses().BindDefaultInterface());
-            IntegrationsKernel.Bind(x => x.FromThisAssembly().SelectAllClasses().BindDefaultInterface());
-
-            IntegrationsKernel.Rebind<IRepository<User>>().To<MongoDbRepository<User>>().InSingletonScope();
-            IntegrationsKernel.Rebind<IRepository<Game>>().To<MongoDbRepository<Game>>().InSingletonScope();
+            IntegrationsKernel.Bind<IRepository<User>>().To<MongoDbRepository<User>>().InSingletonScope();
+            IntegrationsKernel.Bind<IRepository<Game>>().To<MongoDbRepository<Game>>().InSingletonScope();
 
             IntegrationsKernel.Bind<IConnectionStringProvider>().To<AppConfigConnectionStringProvider>().WithConstructorArgument("connectionStringName", "local");
         }
