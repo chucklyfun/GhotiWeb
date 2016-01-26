@@ -101,7 +101,63 @@ namespace GameLogic.Data
 
         public IEnumerable<Domain.MonsterCard> LoadMonsterCardFile(string fileName)
         {
-            return _csvReader.LoadFile<Domain.MonsterCard>(fileName);
+            var result = new List<Domain.MonsterCard>();
+
+            using (var f = File.Open(fileName, FileMode.Open))
+            using (var streamReader = new StreamReader(f))
+            using (var parser = new CsvHelper.CsvParser(streamReader))
+            using (var csvHelper = new CsvHelper.CsvReader(parser))
+            {
+                while (csvHelper.Read())
+                {
+                    var card = new Domain.MonsterCard();
+
+                    int intValue = 0;
+                    string stringValue = string.Empty;
+
+                    if (csvHelper.TryGetField<string>("Name", out stringValue))
+                    {
+                        card.Name = stringValue;
+                    }
+
+                    if (csvHelper.TryGetField<int>("CardNumber", out intValue))
+                    {
+                        card.CardNumber = intValue;
+                    }
+
+                    if (csvHelper.TryGetField<int>("Power", out intValue))
+                    {
+                        card.Power = intValue;
+                    }
+
+                    if (csvHelper.TryGetField<int>("Treasure1", out intValue))
+                    {
+                        card.Treasures.Add(intValue);
+                    }
+
+                    if (csvHelper.TryGetField<int>("Treasure2", out intValue))
+                    {
+                        card.Treasures.Add(intValue);
+                    }
+
+                    if (csvHelper.TryGetField<int>("Treasure3", out intValue))
+                    {
+                        card.Treasures.Add(intValue);
+                    }
+
+                    if (csvHelper.TryGetField<string>("ImageUrl", out stringValue))
+                    {
+                        card.ImageUrl = stringValue;
+                    }
+
+                    if (csvHelper.TryGetField<string>("Description", out stringValue))
+                    {
+                        card.Description = stringValue;
+                    }
+                    result.Add(card);
+                }
+            }
+            return result;
         }
     }
 }

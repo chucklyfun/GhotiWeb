@@ -145,6 +145,7 @@
   <ItemGroup>
     <Content Include="content\images\glyphicons-halflings-white.png" />
     <Content Include="content\images\glyphicons-halflings.png" />
+    <Content Include="content\js\app\utilities.js" />
     <Content Include="content\js\lib\angular-signalr-hub\.gitignore" />
     <Content Include="content\js\lib\angular-signalr-hub\signalr-hub.js" />
     <Content Include="content\js\lib\angular-signalr-hub\signalr-hub.min.js" />
@@ -860,7 +861,8 @@
     <Content Include="Data\attack.csv" />
     <Content Include="Data\draw.csv" />
     <Content Include="Data\equipment.csv" />
-    <Content Include="Data\PlayerCards.csv" />
+    <Content Include="Data\PlayerCards_0001.csv" />
+    <Content Include="Data\MonsterCards_0001.csv" />
     <None Include="Scripts\jquery-1.6.4-vsdoc.js" />
     <Content Include="Scripts\jquery-1.6.4.js" />
     <Content Include="Scripts\jquery-1.6.4.min.js" />

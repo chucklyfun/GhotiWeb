@@ -25,6 +25,13 @@ namespace ghoti.web.Controllers
 
                 return serializationService.Serialize(conf);
             };
+
+            Get["/api/Utilities/Configuration/Reset"] = _ =>
+            {
+                settingsManager.ResetConfiguration();
+
+                return true;
+            };
         }
     }
 }

@@ -6,9 +6,8 @@ define(['angular', 'nggrid', 'app/config', 'services/gameRest', 'services/cards'
     angular.module('mean.system').controller('GameController', ['$rootScope', '$scope', '$http', '$routeParams', '$location', 'Global', '$gameRest', '$userRest', "connection",
         function ($rootScope, $scope, $http, $routeParams, $location, Global, $gameRest, $userRest, connection) {
         
-        $scope.global = Global;
+            $scope.global = Global;
 
-        $scope.init = function () {
             $scope.GameActions = [
                 {
                     Text : 'Wait',
@@ -27,43 +26,77 @@ define(['angular', 'nggrid', 'app/config', 'services/gameRest', 'services/cards'
                     Value : 4
                 },
                 {
-                    Text : 'ViewEquipment',
-                    Value : 5
-                },
-                {
-                    Text: 'ViewHand',
-                    Value: 6
+                    Text: 'StartGame',
+                    Value: 5
                 }
             ];
 
-            $scope.CurrentAction = $scope.GameActions[0];
-
-            $gameRest.get($routeParams.id).success(function (data)
+            $scope.createPlayerView = function(player)
             {
-                $scope.gv = data;
-                $scope.hubs = [];
+                return result =
+                {
+                    Id: player.Id,
+                    SelectedCards: [],
+                    CurrentAction: $scope.GameActions[0]
+                };
+            }
 
-                for (var p in $scope.gv.Players) {
-                    var h = connection.initialize($scope.gv.Id, $scope.gv.Players[p].User.Id);
-                    h.connection.start().done(function () {
-                            console.log('Now connected, connection ID=' + $.connection.hub.id);
-                            h.connected();
-                        })
-                        .fail(function(){ console.log('Could not Connect!'); });
+            $scope.gdTestPlayersOptions = { data: 'players', columnDefs: 'gdTestPlayersCols', enableColumnResize: 'true' };
+            $scope.gdTestPlayersCols = [
+                { 'field': 'Name', displayName: 'Name' },
+                { 'cellTemplate': '<select ng-model="row.entity.CurrentAction.Value" ng-options="g.Text for g in GameActions" />' },
+                { 'cellTemplate': '<button id="btnAction" type="button" class="btn btn-primary" ng-click="Action(row.entity.Id)" >Action</button>' },
+                { 'cellTemplate': '<li data-ng-repeat="c in row.entity.Hand"><span>{{c.Name}}</span><span>{{c.CardNumber}}</span><img ng-src="{{c.ImageUrl}}" ng-click="toggleCard(row.entity.Id, c.Id)"/></li>' }
+            ];
+
+            $scope.players = [];
+
+            $scope.init = function ()
+            {
+                $gameRest.get($routeParams.id).success(function (data)
+                {
+                    $scope.gv = data;
+                    $scope.hubs = [];
+
+                    for (var p in $scope.gv.Players) {
+                        var id = $scope.gv.Players[p].User.Id;
+
+                        var h = connection.initialize($scope.gv.Id, id);
+                        h.connection.start().done(function () {
+                                console.log('Now connected, connection ID=' + $.connection.hub.id);
+                                h.connected();
+                            })
+                            .fail(function(){ console.log('Could not Connect!'); });
 
 
-                    $scope.hubs.push(h);
+                        $scope.hubs.push(h);
 
-                }
-            });            
-        };
+                        $scope.players.push($scope.createPlayerView($scope.gv.Players[p]));  
+                    }
+                });            
+            };
 
-        $scope.SendHello = function () {
+        $scope.toggleCard = function(playerId, cardId)
+        {
+            $scope.SelectedCards[playerId].indexOf(cardId);
+
+            if (index < 0)
+            {
+                $scope.SelectedCards[playerId].push(c);
+            }
+            else
+            {
+                $scope.SelectedCards[playerId].splice(index, 1);
+            }
+        }
+
+        $scope.Action = function (playerId) {
             var playerEvent =
                     {
-                        Action: '1',
-                        Cards: []
+                        Action: $scope.CurrentAction[playerId].Value.Value,
+                        Cards: $scope.SelectedCards[playerId]
                     };
+            $scope.SelectedCards[playerId] = [];
             $scope.hubs[0].send(playerEvent);
         };
 

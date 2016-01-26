@@ -6,6 +6,7 @@ using GameLogic.Player;
 using GameLogic.Deck;
 using GameLogic.External;
 using GameLogic.Domain;
+using Utilities;
 
 namespace GameLogic.Game
 {
@@ -29,6 +30,8 @@ namespace GameLogic.Game
         void PlayerPlaysEquipment(Domain.Game game, Domain.Player player, Domain.PlayerCard card);
 
         void PlayerPlaysAction(Domain.Game game, Domain.Player player, Domain.PlayerCard card);
+
+        void StartGame(Domain.Game game);
     }
 
 
@@ -39,19 +42,22 @@ namespace GameLogic.Game
         private IPlayerManager _playerManager;
         private IGameUtilities _gameUtilities;
         private IGameViewManager _gameViewManager;
+        private ISettingsManager _settingsManager;
 
         public GameManager(
             ICardManager<Domain.MonsterCard> monsterCardManager,
             ICardManager<Domain.PlayerCard> playerCardManager,
             IPlayerManager playerManager,
             IGameUtilities gameUtilities,
-            IGameViewManager gameViewManager)
+            IGameViewManager gameViewManager,
+            ISettingsManager settingsManager)
         {
             _monsterCardManager = monsterCardManager;
             _playerCardManager = playerCardManager;
             _playerManager = playerManager;
             _gameViewManager = gameViewManager;
             _gameUtilities = gameUtilities;
+            _settingsManager = settingsManager;
         }
 
         public bool InitializeGame(Domain.Game game)
@@ -397,6 +403,26 @@ namespace GameLogic.Game
                     }
                 }
             }
+        }
+
+        public void StartGame(Domain.Game game)
+        {
+            foreach (var p in game.Players)
+            {
+                game.PlayerReady[p] = false;
+                game.ActionSide[p] = false;
+            }
+
+            if (string.IsNullOrEmpty(game.Version))
+            {
+                var configuration = _settingsManager.GetConfiguration();
+                game.Version = configuration.DefaultVersion;
+            }
+
+            game.CurrentState = GameState.TurnStart;
+
+            game.PlayerCardDeck = _gameUtilities.LoadPlayerCardDeck(_gameUtilities.GetPlayerCardFileName(game));
+            game.MonsterCardDeck = _gameUtilities.LoadMonsterCardDeck(_gameUtilities.GetMonsterCardFileName(game));
         }
     }
 }

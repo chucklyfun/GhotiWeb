@@ -84,7 +84,7 @@ define(['angular', 'nggrid', 'app/config', 'services/gameRest', 'services/cards'
             $gameRest.delete(entity.Id).success(function (data, status, headers, config) {
                 if (data == "true")
                 {
-                    if (entity.Id == $scope.gv.Id) {
+                    if ($scope.gv != undefined && entity.Id == $scope.gv.Id) {
                         $scope.gv = nothing;
                     }
 

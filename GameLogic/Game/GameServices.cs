@@ -35,6 +35,7 @@ namespace GameLogic.Game
             
             game.Players.Add(new Domain.Player()
             {
+                Id = user.Id,
                 User = user,
                 Name = user.UserName,
                 PlayerNumber = playerNumber

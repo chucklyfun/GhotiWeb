@@ -75,13 +75,10 @@ namespace ghoti.web.Controllers
 
         public void send(ClientPlayerEventArgs eventArgs)
         {
-            var decisionMaker = _decisionMakerManager.GetDecisionMaker(ConnectionType.SignalR, Context.ConnectionId);
+            var playerId = new ObjectId(Context.QueryString["playerId"]);
+            var gameId = new ObjectId(Context.QueryString["gameId"]);
 
-            if (decisionMaker != null)
-            {
-                
-                _decisionMakerManager.ProcessPlayerEvent(eventArgs, decisionMaker);
-            }
+            _decisionMakerManager.ProcessPlayerEvent(eventArgs, gameId, playerId);            
         }
     }
 }

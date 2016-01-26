@@ -7,6 +7,8 @@ using GameLogic.Game;
 using GameLogic.External;
 using GameLogic.Domain;
 using MongoDB.Bson;
+using Utilities.Data;
+using Newtonsoft.Json;
 
 namespace GameLogic.Game
 {
@@ -55,6 +57,7 @@ namespace GameLogic.Game
     {
         public ClientToServerAction Action { get; set; }
 
+        [JsonConverter(typeof(ListObjectIdConverter))]
         public IList<ObjectId> Cards { get; set; }
     }
 

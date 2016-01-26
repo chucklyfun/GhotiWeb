@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using Microsoft.Owin;
 using Owin;
+using Microsoft.AspNet.SignalR;
 
 namespace Ghoti.Web
 {
@@ -12,7 +13,9 @@ namespace Ghoti.Web
     {
         public void Configuration(IAppBuilder app)
         {
-            app.MapSignalR();
+            var hubConfiguration = new HubConfiguration();
+            hubConfiguration.EnableDetailedErrors = true;
+            app.MapSignalR(hubConfiguration);
         }
     }
 }

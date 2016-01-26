@@ -2,6 +2,8 @@ using MongoDB.Bson;
 using System;
 using MongoDB.Bson.Serialization.Attributes;
 using Newtonsoft.Json;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace Utilities.Data
 {
@@ -83,6 +85,38 @@ namespace Utilities.Data
         public override bool CanConvert(Type objectType)
         {
             return typeof(ObjectId).IsAssignableFrom(objectType);
+            //return true;
+        }
+
+
+    }
+
+    public class ListObjectIdConverter : JsonConverter
+    {
+
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        {
+            serializer.Serialize(writer, value.ToString());
+
+        }
+
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        {
+            if (reader.TokenType == JsonToken.StartArray)
+            {
+                return serializer.Deserialize<List<ObjectId>>(reader);
+            }
+            else
+            {
+                var media = serializer.Deserialize<ObjectId>(reader);
+                return new List<ObjectId>(new[] { media });
+            }
+
+        }
+
+        public override bool CanConvert(Type objectType)
+        {
+            return typeof(List<ObjectId>).IsAssignableFrom(objectType);
             //return true;
         }
 

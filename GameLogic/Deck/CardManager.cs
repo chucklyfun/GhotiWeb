@@ -5,6 +5,7 @@ using Utilities.Data.Cache;
 using GameLogic.Data;
 
 using MongoDB.Bson;
+using System;
 
 namespace GameLogic.Deck
 {
@@ -14,7 +15,7 @@ namespace GameLogic.Deck
         T DrawCard(Domain.Game game, Deck<T> deck);
         void AddToDiscard(Deck<T> deck, T card);
 
-        T GetCard(GameLogic.Domain.Game game, ObjectId cardId);
+        T GetCard(GameLogic.Domain.Game game, ObjectId cardId, Func<IEnumerable<T>> getter);
     }
 
     public class CardManager<T> : ICardManager<T> where T : Domain.ICard
@@ -52,14 +53,9 @@ namespace GameLogic.Deck
             deck.DiscardPile.Add(card);
         }
 
-        public T GetCard(GameLogic.Domain.Game game, ObjectId cardId)
+        public T GetCard(GameLogic.Domain.Game game, ObjectId cardId, Func<IEnumerable<T>> getter)
         {
-            var cardList = _cache.AddOrGetExisting(game.Version + ":PlayerCardDeck", () =>
-            {
-                return _cardLoader.LoadPlayerCardFile("playerCards_" + game.Version + ".csv");
-            }) as IEnumerable<T> ?? new List<T>();
-
-            
+            var cardList = _cache.AddOrGetExisting(game.Version + ":PlayerCardDeck", () => getter()) as IEnumerable<T> ?? new List<T>();
 
             return cardList.FirstOrDefault(f => f.Id.Equals(cardId));
         }

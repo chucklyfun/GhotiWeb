@@ -16,8 +16,8 @@ namespace Utilities
 
         public string Name { get; set; }
 
-        public string PlayerCardDataFile { get; set; }
+        public string DefaultVersion { get; set; }
 
-        public string MonsterCardDataFile { get; set; }
+        public string DataPath { get; set; }
     }
 }

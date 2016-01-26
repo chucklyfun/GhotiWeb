@@ -1,25 +1,6 @@
 <section data-ng-controller="GameController" data-ng-init="init()">
     <label>{{game.Id}}</label>
     <label>{{data}}</label>
-    <select ng-model="CurrenctAction" ng-options="g.Text for g in GameActions track"/>
-    <label>Message</label>
-    <label>{{Message}}</label>
-    <label>Response</label>
-    <label>{{Response}}</label>
-    <button ng-click="SendHello()" >Send Hello"</button>
-    <ul>
-        <li data-ng-repeat="p in Players">
-            <span>{{c.Title}}</span> /
-            <span>{{c.Text}}</span>
-            <img ng-src="{{c.imageUrl}}" />
-        </li>
-    </ul>
-    <ul>
-        <li data-ng-repeat="c in Cards">
-            <span>{{c.Name}}</span> /
-            <span>{{c.CardNumber}}</span>
-            <img ng-src="{{c.ImageUrl}}" />
-        </li>
-    </ul>
 
+    <div class="gridStyle" ng-grid="gdTestPlayersOptions" style="height:500px"/>
 </section>

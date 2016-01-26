@@ -16,10 +16,11 @@ require.config({
         nggrid: ['lib/ng-grid/ng-grid-2.0.7.debug'],
         linqjs: ['lib/linq'],
         signalr: ['lib/angular-signalr-hub/jquery.signalR-2.1.2'],
-        angularsignalr: ['lib/angular-signalr-hub/signalr-hub']
+        angularsignalr: ['lib/angular-signalr-hub/signalr-hub'],
+        utilities:['app/utilities'],
     },
     shim: {
-        jquery: { exports: '$' },
+        jquery: { exports: '$', deps: ['utilities'] },
         linqjs: { exports: 'Enumerable' },
         angular: { exports: 'angular', deps: ['jquery'] },
         angularbootstraptpls: { deps: ['angular'] },

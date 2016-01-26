@@ -12,6 +12,8 @@ namespace Utilities
         Configuration GetConfiguration();
 
         Configuration SetConfiguration(Configuration configuration);
+
+        void ResetConfiguration();
     }
 
     public class SettingsManager : ISettingsManager
@@ -32,7 +34,9 @@ namespace Utilities
                 {
                     SocketConnectionAddress = @"localhost",
                     SocketConnectionPort = 11000,
-                    Name = "Test"
+                    Name = "Test",
+                    DefaultVersion = "0001",
+                    DataPath = "~/Data/"
                 };
 
                 _configurationRepository.Insert(result);
@@ -45,6 +49,11 @@ namespace Utilities
         public Configuration SetConfiguration(Configuration configuration)
         {
             return _configurationRepository.Update(configuration);
+        }
+
+        public void ResetConfiguration()
+        {
+            _configurationRepository.RemoveAll();
         }
     }
 }

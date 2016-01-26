@@ -7,6 +7,7 @@ using GameLogic.Game;
 using Utilities.Data;
 using MongoDB.Bson;
 using GameLogic.Deck;
+using GameLogic.Data;
 
 namespace GameLogic.External
 {
@@ -24,7 +25,7 @@ namespace GameLogic.External
 
         bool ClearAllConnections();
 
-        void ProcessPlayerEvent(ClientPlayerEventArgs playerEvent, DecisionMaker decisionMaker);
+        void ProcessPlayerEvent(ClientPlayerEventArgs playerEvent, ObjectId gameId, ObjectId playerId);
     }
 
     public class ViewEventArgs : EventArgs
@@ -46,8 +47,10 @@ namespace GameLogic.External
         private IGameViewManager _gameViewManager;
         private ICardManager<PlayerCard> _playerCardManager;
         private ICardManager<MonsterCard> _monsterCardManager;
+        private ICardLoader _cardLoader;
+        private IGameUtilities _gameUtilities;
 
-	    public DecisionMakerManager (IPlayerManager playerManager, IRepository<DecisionMaker> decisionMakerRepository, IRepository<GameLogic.Domain.Game> gameRepository, IGameManager gameManager, ICardManager<PlayerCard> playerCardManager, ICardManager<MonsterCard> monsterCardManager, IGameViewManager gameViewManager)
+	    public DecisionMakerManager (IPlayerManager playerManager, IRepository<DecisionMaker> decisionMakerRepository, IRepository<GameLogic.Domain.Game> gameRepository, IGameManager gameManager, ICardManager<PlayerCard> playerCardManager, ICardManager<MonsterCard> monsterCardManager, IGameViewManager gameViewManager, ICardLoader cardLoader, IGameUtilities gameUtilities)
 	    {
 		    _playerManager = playerManager;
             _gameViewManager = gameViewManager;
@@ -55,6 +58,7 @@ namespace GameLogic.External
             _gameManager = gameManager;
             _gameViewManager = gameViewManager;
             _decisionMakerRepository = decisionMakerRepository;
+            _gameUtilities = gameUtilities;
 
             _playerCardManager = playerCardManager;
             _monsterCardManager = monsterCardManager;
@@ -89,8 +93,8 @@ namespace GameLogic.External
 
         public DecisionMaker GetDecisionMaker(ConnectionType connectionType, string connectionId)
         {
-            return _decisionMakerRepository.AsQueryable()
-                .Where(f => f.ConnectionType == connectionType && f.ConnectionId.Equals(connectionId)).FirstOrDefault();
+            var data = _decisionMakerRepository.AsQueryable().ToList();
+            return data.Where(f => f.ConnectionType == connectionType && f.ConnectionId.Equals(connectionId)).FirstOrDefault();
         }
 
         public List<DecisionMaker> GetOrInsertDecisionMakers(ObjectId gameId, ObjectId playerId, ConnectionType connectionType, string connectionId)
@@ -163,20 +167,31 @@ namespace GameLogic.External
         }
 
 
-        public void ProcessPlayerEvent(ClientPlayerEventArgs eventArgs, DecisionMaker decisionMaker)
+        public void ProcessPlayerEvent(ClientPlayerEventArgs eventArgs, ObjectId gameId, ObjectId playerId)
         {
-            var game = _gameRepository.GetById(decisionMaker.GameId);
-            var player = game.Players.FirstOrDefault(f => f.Id.Equals(decisionMaker.PlayerId));
+            var game = _gameRepository.GetById(gameId);
+            var player = game.Players.FirstOrDefault(f => f.Id.Equals(playerId));
             
             if (game != null && player != null)
             {
                 if (eventArgs.Action == ClientToServerAction.StartGame)
                 {
-                    // initialize the game if it isn't already
+                    game.PlayerReady[player] = true;
+
+                    if (game.Players.Count >= 2 && game.Players.All(f =>
+                    {
+                        var ready = false;
+                        game.PlayerReady.TryGetValue(f, out ready);
+                        return ready;
+                    }))
+                    {
+                        _gameManager.StartGame(game);
+                    }
                 }
                 else if (eventArgs.Action == ClientToServerAction.PlayEquipment)
                 {
-                    var card = _playerCardManager.GetCard(game, eventArgs.Cards.FirstOrDefault());
+                    var card = _playerCardManager.GetCard(game, eventArgs.Cards.FirstOrDefault(),
+                        () => _cardLoader.LoadPlayerCardFile(_gameUtilities.GetPlayerCardFileName(game)));
 
                     if (card != null)
                     {
@@ -185,7 +200,8 @@ namespace GameLogic.External
                 }
                 else if (eventArgs.Action == ClientToServerAction.PlayAction)
                 {
-                    var card = _playerCardManager.GetCard(game, eventArgs.Cards.FirstOrDefault());
+                    var card = _playerCardManager.GetCard(game, eventArgs.Cards.FirstOrDefault(),
+                        () => _cardLoader.LoadPlayerCardFile(_gameUtilities.GetPlayerCardFileName(game)));
 
                     if (card != null)
                     {

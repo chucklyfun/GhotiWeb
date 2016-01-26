@@ -17,7 +17,7 @@ namespace GameLogic.Domain
 
         public Queue<MonsterCard> MonsterQueue { get; set; }
 
-        public Deck<MonsterCard> MonsterDeck { get; set; }
+        public Deck<MonsterCard> MonsterCardDeck { get; set; }
         public Deck<PlayerCard> PlayerCardDeck { get; set; }
 
         public IDictionary<Domain.Player, PlayerCard> BlindActions { get; set; }
@@ -40,7 +40,7 @@ namespace GameLogic.Domain
         {
             MonsterQueue = new Queue<Domain.MonsterCard>();
             Players = new List<Domain.Player>();
-            MonsterDeck = new Deck<Domain.MonsterCard>();
+            MonsterCardDeck = new Deck<Domain.MonsterCard>();
             PlayerCardDeck = new Deck<Domain.PlayerCard>();
             BlindActions = new Dictionary<Domain.Player, PlayerCard>();
             EquipActions = new Dictionary<Domain.Player, PlayerCard>();
