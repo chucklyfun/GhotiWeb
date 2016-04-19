@@ -6,9 +6,10 @@ using Microsoft.Owin;
 using Owin;
 using Microsoft.AspNet.SignalR;
 
+[assembly: OwinStartup(typeof(Ghoti.Web.Startup))]
 namespace Ghoti.Web
 {
-    [assembly: OwinStartup(typeof(Ghoti.Web.Startup))]
+    
     public class Startup
     {
         public void Configuration(IAppBuilder app)

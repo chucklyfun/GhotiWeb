@@ -128,9 +128,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AsynchronousSocketListener.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="AsynchronousSocketListener.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="Data\Cache\RuntimeCache.cs" />
     <Compile Include="Data\CsvReader.cs" />
