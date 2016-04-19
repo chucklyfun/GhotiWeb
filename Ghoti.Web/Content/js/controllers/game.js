@@ -1,120 +1,143 @@
-
-define(['angular', 'nggrid', 'app/config', 'services/gameRest', 'services/cards', 'services/userRest', 'services/asyncConnectionManager'], function (angular, nggrid, config, gameRest, cards, userRest, AsyncConnectionManager) {
-    /**
-     * Create a gameview
-     */
-    angular.module('mean.system').controller('GameController', ['$rootScope', '$scope', '$http', '$routeParams', '$location', 'Global', '$gameRest', '$userRest', "connection",
-        function ($rootScope, $scope, $http, $routeParams, $location, Global, $gameRest, $userRest, connection) {
-        
-            $scope.global = Global;
-
-            $scope.GameActions = [
-                {
-                    Text : 'Wait',
-                    Value : 1
-                },
-                {
-                    Text : 'DrawAndDiscard',
-                    Value : 2
-                },
-                {
-                    Text : 'PlayAction',
-                    Value : 3
-                },
-                {
-                    Text : 'PlayEquipment',
-                    Value : 4
-                },
-                {
-                    Text: 'StartGame',
-                    Value: 5
-                }
-            ];
-
-            $scope.createPlayerView = function(player)
+/**
+* Create a gameview
+*/
+angular.module('routerApp').controller('GameController', ['$rootScope', '$scope', '$http', '$stateParams', '$gameRest', '$userRest', 'connection',
+    function ($rootScope, $scope, $http, $stateParams, $gameRest, $userRest, connection) {
+        $scope.Wait = 
             {
-                return result =
-                {
-                    Id: player.Id,
-                    SelectedCards: [],
-                    CurrentAction: $scope.GameActions[0]
-                };
-            }
-
-            $scope.gdTestPlayersOptions = { data: 'players', columnDefs: 'gdTestPlayersCols', enableColumnResize: 'true' };
-            $scope.gdTestPlayersCols = [
-                { 'field': 'Name', displayName: 'Name' },
-                { 'cellTemplate': '<select ng-model="row.entity.CurrentAction.Value" ng-options="g.Text for g in GameActions" />' },
-                { 'cellTemplate': '<button id="btnAction" type="button" class="btn btn-primary" ng-click="Action(row.entity.Id)" >Action</button>' },
-                { 'cellTemplate': '<li data-ng-repeat="c in row.entity.Hand"><span>{{c.Name}}</span><span>{{c.CardNumber}}</span><img ng-src="{{c.ImageUrl}}" ng-click="toggleCard(row.entity.Id, c.Id)"/></li>' }
-            ];
-
-            $scope.players = [];
-
-            $scope.init = function ()
+                id : 'Wait',
+                value : 1
+            };
+        $scope.DrawAndDiscard =
             {
-                $gameRest.get($routeParams.id).success(function (data)
-                {
-                    $scope.gv = data;
-                    $scope.hubs = [];
-
-                    for (var p in $scope.gv.Players) {
-                        var id = $scope.gv.Players[p].User.Id;
-
-                        var h = connection.initialize($scope.gv.Id, id);
-                        h.connection.start().done(function () {
-                                console.log('Now connected, connection ID=' + $.connection.hub.id);
-                                h.connected();
-                            })
-                            .fail(function(){ console.log('Could not Connect!'); });
-
-
-                        $scope.hubs.push(h);
-
-                        $scope.players.push($scope.createPlayerView($scope.gv.Players[p]));  
-                    }
-                });            
+                id : 'DrawAndDiscard',
+                value : 2
+            };
+        $scope.PlayAction =
+            {
+                id : 'PlayAction',
+                value : 3
+            };
+        $scope.PlayEquipment = 
+            {
+                id : 'PlayEquipment',
+                value : 4
+            };
+        $scope.StartGame =
+            {
+                id: 'StartGame',
+                value: 5
             };
 
-        $scope.toggleCard = function(playerId, cardId)
+        $scope.createPlayerView = function(player)
         {
-            $scope.SelectedCards[playerId].indexOf(cardId);
-
-            if (index < 0)
+            return result =
             {
-                $scope.SelectedCards[playerId].push(c);
-            }
-            else
-            {
-                $scope.SelectedCards[playerId].splice(index, 1);
-            }
+                Id: player.Id,
+                SelectedCards: [],
+                CurrentAction: $scope.Wait.value
+            };
         }
 
-        $scope.Action = function (playerId) {
-            var playerEvent =
-                    {
-                        Action: $scope.CurrentAction[playerId].Value.Value,
-                        Cards: $scope.SelectedCards[playerId]
-                    };
-            $scope.SelectedCards[playerId] = [];
-            $scope.hubs[0].send(playerEvent);
-        };
+        $scope.gdTestPlayersOptions =
+            {
+                columnDefs: [
+                    { 'field': 'Name', displayName: 'Name', enableCellEdit: 'false' },
+                    { 'field': 'row.entity.CurrentAction', editDropdownOptionsArray : $scope.GameActions   },
+                    { name: 'Start Game',
+                    cellTemplate: '<div><button id="btnStartGame" type="button" class="btn btn-primary" ng-click="grid.appScope.Action(row.entity.Id, StartGame)" >Start Game</button></div>'
+                    },
+                    { name: 'Play Action',
+                    cellTemplate: '<div><button id="btnPlayAction" type="button" class="btn btn-primary" ng-click="grid.appScope.Action(row.entity.Id, PlayAction)" >Play Action</button></div>'
+                    },
+                    { name: 'Play Equipment',
+                    cellTemplate: '<div><button id="btnPlayEquipment" type="button" class="btn btn-primary" ng-click="grid.appScope.Action(row.entity.Id, PlayEquipment)" >Play Equipment</button></div>'
+                    },
+                    { name: 'Draw and Discard',
+                    cellTemplate: '<div><button id="btnDrawAndDiscard" type="button" class="btn btn-primary" ng-click="grid.appScope.Action(row.entity.Id, DrawAndDiscard)" >Draw And Discard</button></div>'
+                    },
+                    { name: 'Wait',
+                    cellTemplate: '<div><button id="btnWait" type="button" class="btn btn-primary" ng-click="grid.appScope.Action(row.entity.Id, Wait)" >Wait</button></div>'
+                    },
+                    { name: 'Hand',
+                    cellTemplate: '<li data-ng-repeat="c in row.entity.Hand"><span>{{c.Name}}</span><span>{{c.CardNumber}}</span><img ng-src="{{c.ImageUrl}}" ng-click="grid.appScope.toggleCard(row.entity.Id, c.Id)"/></li>'
+                    }
+                ],
+                enableColumnResize: 'true'
+            };
+            
 
-        $scope.ClientTest = function () {
-            $http({ method: 'GET', url: 'api/game/clienttest' });
-        };
+        $scope.players = [];
 
-        $scope.showcards = function()
+        $scope.init = function ()
         {
-            $http({method: 'GET', url: 'api/game/getcard'})
-                .success(function(data)
-                    {
-                        $scope.gv.Cards.push(data);
-                    })
-                .error(function(data)
-                    {
-                        $scope.error = data;
-                    });
+            $gameRest.get($stateParams.Id).success(function (data)
+            {
+                $scope.gv = data;
+                $scope.hubs = [];
+
+                for (var p in $scope.gv.Players) {
+                    var id = $scope.gv.Players[p].User.Id;
+
+                    var h = connection.initialize($scope.gv.Id, id);
+                    h.connection.start().done(function () {
+                            console.log('Now connected, connection ID=' + $.connection.hub.id);
+
+                            h.connected();
+
+                            $scope.hubs.push(h);
+                            $scope.players.push($scope.createPlayerView($scope.gv.Players[p]));
+                        })
+                        .fail(function ()
+                        {
+                            console.log('Could not Connect!');
+                        });
+
+
+                    
+                    
+                }
+            });            
         };
-    }]);
-});
+
+    $scope.toggleCard = function(playerId, cardId)
+    {
+        $scope.SelectedCards[playerId].indexOf(cardId);
+
+        if (index < 0)
+        {
+            $scope.SelectedCards[playerId].push(c);
+        }
+        else
+        {
+            $scope.SelectedCards[playerId].splice(index, 1);
+        }
+    }
+
+    $scope.Action = function (playerId, action) {
+        var playerEvent =
+                {
+                    Action: action,
+                    Cards: $scope.SelectedCards[playerId]
+                };
+        $scope.SelectedCards[playerId] = [];
+        $scope.hubs[0].send(playerEvent);
+    };
+
+    $scope.ClientTest = function () {
+        $http({ method: 'GET', url: 'api/game/clienttest' });
+    };
+
+    $scope.showcards = function()
+    {
+        $http({method: 'GET', url: 'api/game/getcard'})
+            .success(function(data)
+                {
+                    $scope.gv.Cards.push(data);
+                })
+            .error(function(data)
+                {
+                    $scope.error = data;
+                });
+    };
+}]);

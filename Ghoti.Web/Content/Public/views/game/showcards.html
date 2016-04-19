@@ -1,6 +1,6 @@
-<section data-ng-controller="GameController" data-ng-init="init()">
+<div data-ng-controller="GameController" data-ng-init="init()">
     <label>{{game.Id}}</label>
     <label>{{data}}</label>
 
-    <div class="gridStyle" ng-grid="gdTestPlayersOptions" style="height:500px"/>
-</section>
+    <div ui-grid="{ data: players, columnDefs: gameCols }" style="height:400px" />
+</div>

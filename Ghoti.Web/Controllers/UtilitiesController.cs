@@ -5,12 +5,13 @@ using Utilities;
 using PagedList;
 using MongoDB.Bson;
 using Nancy.ModelBinding;
+using DataInitializer;
 
 namespace ghoti.web.Controllers
 {
     public class UtilitiesController : Nancy.NancyModule
     {
-        public UtilitiesController(ISettingsManager settingsManager, ISerializationService serializationService)
+        public UtilitiesController(ISettingsManager settingsManager, ISerializationService serializationService, IInitializer initializer)
         {
             Get["/api/Utilities/Configuration/Get"] = _ =>
             {
@@ -30,6 +31,13 @@ namespace ghoti.web.Controllers
             {
                 settingsManager.ResetConfiguration();
 
+                return true;
+            };
+
+            Get["/api/Utilities/Configuration/Initialize"] = _ =>
+            {
+                initializer.InitializeAdminUser();
+                initializer.InitializePlayers(10);
                 return true;
             };
         }

@@ -1,18 +1,22 @@
-<section data-ng-controller="StartController" data-ng-init="init()">
-    
+<div data-ng-controller="StartController" data-ng-init="init()">
+
     <label>{{error}}</label>
     <h2>{{name}}</h2>
     <button ng-click="startGame()">Start Game</button>
     <button ng-click="createGame()">Create Game</button>
+    <a ui-sref="test-game({Id: gv.Id})" class="btn btn-primary">Start Game</a>
+
+    <h2>Current Game</h2>
+    <label>{{gv.Id}}</label>
     <h3>Players</h3>
-    <div class="gridStyle" ng-grid="playerGridOptions" />
+    <div class="gridStyle" ui-grid="{ data: users, columnDefs: playerCols }" style="height:500px;width:500px" />
     <ul>
-		<li data-ng-repeat="p in gv.Players">
-			<div>{{p.Username}}</div>
-            <div>{{p.FullName}}</div>
-            <div>{{p.Email}}</div>
-		</li>
+        <li data-ng-repeat="p in gv.Players">
+            <div>{{p.User.Username}}</div>
+            <div>{{p.User.FullName}}</div>
+            <div>{{p.User.Email}}</div>
+        </li>
     </ul>
     <h3>Games</h3>
-    <div class="gridStyle" ng-grid="gameGridOptions" />
-</section>
+    <div ui-grid="{ data: games, columnDefs: gameCols }" style="height:500px;width:500px" />
+</div>

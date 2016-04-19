@@ -6,6 +6,10 @@
     <title>@ViewBag.Title - My ASP.NET Application</title>
     @Styles.Render("/Content/Site.css")
     @Styles.Render("/public/css/common.css")
+    
+    
+
+    <script src="src/js/vendor/bower.js"></script>")
 </head>
 <body>
     <div class="navbar navbar-inverse navbar-fixed-top">
@@ -36,8 +40,7 @@
     </div>
 
 
-    @Scripts.Render("/js/lib/require.js")
-    @Scripts.Render("/js/app/require-config.js")
+    @Scripts.Render("bower_components/bower.js")
 
     <script type="text/javascript">
         require(["app/app"], function() {

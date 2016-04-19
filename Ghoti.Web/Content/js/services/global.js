@@ -1,11 +1,9 @@
-define(['angular'], function() {
-    angular.module('mean.system').factory("Global", [function(angular) {
-        var _this = this;
-        _this._data = {
-            user: window.user,
-            authenticated: !!window.user
-        };
+angular.module('routerApp').factory("Global", [function (angular) {
+    var _this = this;
+    _this._data = {
+        user: window.user,
+        authenticated: !!window.user
+    };
 
-        return _this._data;
-    }]);
-});
+    return _this._data;
+}]);

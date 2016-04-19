@@ -1,29 +1,55 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
+
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <style>
+        .navbar {
+            border-radius: 0;
+        }
+    </style>
+
     <title>My ASP.NET Application</title>
     <link rel="stylesheet" type="text/css" href="/content/public/css/Site.css">
     <link rel="stylesheet" type="text/css" href="/content/public/css/common.css">
+    <link rel="stylesheet" type="text/css" href="/content/public/css/bower.css">
+
+    <script type="text/javascript" src="/content/js/app/bower.js"></script>
+    <script type="text/javascript" src="/content/js/app/routerApp.js"></script>
+    <script type="text/javascript" src="/content/js/services/debug.js"></script>
+    <script type="text/javascript" src="/content/js/app/config.js"></script>
+
+
+    <script type="text/javascript" src="/content/js/app/directives.js"></script>
+    <script type="text/javascript" src="/content/js/app/filters.js"></script>
+    <script type="text/javascript" src="/content/js/services/asyncConnectionManager.js"></script>
+    <script type="text/javascript" src="/content/js/services/cards.js"></script>
+    <script type="text/javascript" src="/content/js/services/gameRest.js"></script>
+    <script type="text/javascript" src="/content/js/services/global.js"></script>
+    <script type="text/javascript" src="/content/js/services/userResource.js"></script>
+    <script type="text/javascript" src="/content/js/services/userRest.js"></script>
+
+    <script type="text/javascript" src="/content/js/controllers/header.js"></script>
+    <script type="text/javascript" src="/content/js/controllers/game.js"></script>
+    <script type="text/javascript" src="/content/js/controllers/index.js"></script>
+    <script type="text/javascript" src="/content/js/controllers/start.js"></script>
+
 </head>
-<body>
-    <div class="container body-content">
-        <section data-ng-view/>
-        <hr />
-        <footer>
-            <p>My ASP.NET Application</p>
-        </footer>
-    </div>
 
+    
 
-    <script type="text/javascript" src="/content/js/lib/require.js"></script>
-    <script type="text/javascript" src="/content/js/app/require-config.js"></script>
-
-    <script type="text/javascript">
-        require(["app/app"], function() {
-
-        });
-    </script>
-</body>
+    <body ng-app="routerApp">
+        <!-- MAIN CONTENT -->
+        <!-- THIS IS WHERE WE WILL INJECT OUR CONTENT ============================== -->
+        <div>
+            <div ui-view></div>
+        </div>
+        <div class="text-center">
+            <p>A tutorial by <a href="http://scotch.io" target="_blank">scotch.io</a></p>
+            <p>View the tutorial: <a href="http://scotch.io/tutorials/javascript/angular-routing-using-ui-router" target="_blank">AngularJS Routing using UI-Router</a></p>
+        </div>
+    </body>
 </html>
