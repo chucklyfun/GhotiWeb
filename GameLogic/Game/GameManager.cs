@@ -12,7 +12,7 @@ namespace GameLogic.Game
 {
     public interface IGameManager
     {
-        void PlayCardBlind(Domain.Game g, Domain.Player player, Domain.PlayerCard card, bool facing);
+        void PlayCardBlind(Domain.Game g, Domain.Player player, Domain.PlayerCard card, bool actionSide);
         bool CanReveal(Domain.Game g);
         void ProcessReveal(Domain.Game g);
 
@@ -43,6 +43,8 @@ namespace GameLogic.Game
         private IGameUtilities _gameUtilities;
         private IGameViewManager _gameViewManager;
         private ISettingsManager _settingsManager;
+        private ICardUtilities<Domain.MonsterCard> _monsterCardUtilities;
+        private ICardUtilities<Domain.PlayerCard> _playerCardUtilities;
 
         public GameManager(
             ICardManager<Domain.MonsterCard> monsterCardManager,
@@ -423,6 +425,24 @@ namespace GameLogic.Game
 
             game.PlayerCardDeck = _gameUtilities.LoadPlayerCardDeck(_gameUtilities.GetPlayerCardFileName(game));
             game.MonsterCardDeck = _gameUtilities.LoadMonsterCardDeck(_gameUtilities.GetMonsterCardFileName(game));
+
+            _playerCardUtilities.Shuffle(game.PlayerCardDeck);
+            _monsterCardUtilities.Shuffle(game.MonsterCardDeck);
+
+            foreach (var p in game.Players)
+            {
+                // TODO 4/21/2016 bdrosander - add starting hand to game settings.
+                for (int i = 0; i < 5; ++i)
+                {
+                    p.Hand.Add(_playerCardManager.DrawCard(game, game.PlayerCardDeck));
+                }
+            }
+
+            _gameViewManager.UpdatedGameView(new GameViewEventArgs()
+            {
+                Action = ServerToClientAction.PlayBlind,
+                Game = game
+            });
         }
     }
 }

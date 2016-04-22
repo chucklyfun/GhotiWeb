@@ -7,6 +7,7 @@ using GameLogic.Player;
 using GameLogic.Data;
 using Utilities;
 using System.IO;
+using System.Web;
 
 namespace GameLogic.Game
 {
@@ -52,7 +53,8 @@ namespace GameLogic.Game
             var result = new Deck.Deck<Domain.PlayerCard>();
 
             var configuration = _settingsManager.GetConfiguration();
-            result.DrawPile = new Stack<Domain.PlayerCard>(_cardLoader.LoadPlayerCardFile(Path.Combine(configuration.DataPath, fileName)));
+            var path = HttpContext.Current.Server.MapPath(Path.Combine(configuration.DataPath, fileName));
+            result.DrawPile = new Stack<Domain.PlayerCard>(_cardLoader.LoadPlayerCardFile(path));
 
             return result;
         }
@@ -62,7 +64,8 @@ namespace GameLogic.Game
             var result = new Deck.Deck<Domain.MonsterCard>();
 
             var configuration = _settingsManager.GetConfiguration();
-            result.DrawPile = new Stack<Domain.MonsterCard>(_cardLoader.LoadMonsterCardFile(Path.Combine(configuration.DataPath, fileName)));
+            var path = HttpContext.Current.Server.MapPath(Path.Combine(configuration.DataPath, fileName));
+            result.DrawPile = new Stack<Domain.MonsterCard>(_cardLoader.LoadMonsterCardFile(path));
 
             return result;
         }

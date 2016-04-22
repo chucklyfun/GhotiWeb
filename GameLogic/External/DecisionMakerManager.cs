@@ -166,6 +166,30 @@ namespace GameLogic.External
             return gv;
         }
 
+        public bool ReadyPlayer(Domain.Game game, Domain.Player player)
+        {
+            var update = false;
+            var outValue = false;
+
+            if (!game.PlayerReady.TryGetValue(player, out outValue) || !outValue)
+            {
+                game.PlayerReady[player] = true;
+                update = true;
+            }
+
+            if (game.Players.Count >= 2 && game.Players.All(
+                f => {
+                    var ready = false;
+                    game.PlayerReady.TryGetValue(f, out ready);
+                    return ready;
+                }))
+            {
+                _gameManager.StartGame(game);
+                update = true;
+            }
+
+            return update;
+        }
 
         public void ProcessPlayerEvent(ClientPlayerEventArgs eventArgs, ObjectId gameId, ObjectId playerId)
         {
@@ -176,39 +200,36 @@ namespace GameLogic.External
             {
                 if (eventArgs.Action == ClientToServerAction.StartGame)
                 {
-                    game.PlayerReady[player] = true;
-
-                    if (game.Players.Count >= 2 && game.Players.All(f =>
+                    if (ReadyPlayer(game, player))
                     {
-                        var ready = false;
-                        game.PlayerReady.TryGetValue(f, out ready);
-                        return ready;
-                    }))
-                    {
-                        _gameManager.StartGame(game);
+                        _gameRepository.Update(game);
                     }
                 }
-                else if (eventArgs.Action == ClientToServerAction.PlayEquipment)
+                else if (eventArgs.Action == ClientToServerAction.PlayEquipment 
+                    || eventArgs.Action == ClientToServerAction.PlayAction)
                 {
-                    var card = _playerCardManager.GetCard(game, eventArgs.Cards.FirstOrDefault(),
-                        () => _cardLoader.LoadPlayerCardFile(_gameUtilities.GetPlayerCardFileName(game)));
-
-                    if (card != null)
+                    if (PlayCard(eventArgs, game, player))
                     {
-                        _gameManager.PlayCardBlind(game, player, card, false);
-                    }                    
-                }
-                else if (eventArgs.Action == ClientToServerAction.PlayAction)
-                {
-                    var card = _playerCardManager.GetCard(game, eventArgs.Cards.FirstOrDefault(),
-                        () => _cardLoader.LoadPlayerCardFile(_gameUtilities.GetPlayerCardFileName(game)));
-
-                    if (card != null)
-                    {
-                        _gameManager.PlayCardBlind(game, player, card, true);
-                    }                    
+                        _gameRepository.Update(game);
+                    }
                 }
             }
+        }
+
+        public bool PlayCard(ClientPlayerEventArgs eventArgs, Domain.Game game, Domain.Player player)
+        {
+            var update = false;
+
+            var card = _playerCardManager.GetCard(game, eventArgs.Cards.FirstOrDefault(),
+                () => _cardLoader.LoadPlayerCardFile(_gameUtilities.GetPlayerCardFileName(game)));
+
+            if (card != null)
+            {
+                _gameManager.PlayCardBlind(game, player, card, eventArgs.Action == ClientToServerAction.PlayAction);
+                update = true;    
+            }
+
+            return update;
         }    
     }
 }
