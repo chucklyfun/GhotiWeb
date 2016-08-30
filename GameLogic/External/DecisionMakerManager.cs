@@ -11,28 +11,45 @@ using GameLogic.Data;
 
 namespace GameLogic.External
 {
-    public delegate void UpdatedViewEvent(object sender, ViewEventArgs eventArgs);
+    public delegate void UpdatedViewEvent(object sender, ClientViewEventArgs eventArgs);
+
+    public delegate void UpdatedGameViewEvent(object sender, GameViewEventArgs eventArgs);
+
+    public delegate void MessageEventHandler(object sender, MessageEventArgs eventArgs);
 
     public interface IDecisionMakerManager
     {	
-        event UpdatedViewEvent UpdatedViewEvent;
+        event UpdatedViewEvent UpdatedPlayerViewEvent;
+
+        event MessageEventHandler MessageEvent;
+
+        void MessageEventSafe(object sender, MessageEventArgs eventArgs);
         
-        IList<DecisionMaker> GetDecisionMakers(ObjectId gameId, ObjectId playerId);
+        List<DecisionMaker> GetDecisionMakers(ObjectId gameId, ObjectId playerId);
 
-        DecisionMaker GetDecisionMaker(ConnectionType connectionType, string connectionId);
+        DecisionMaker Get(ConnectionType connectionType, ObjectId connectionId);
 
-        List<DecisionMaker> GetOrInsertDecisionMakers(ObjectId gameId, ObjectId playerId, ConnectionType connectionType, string connectionId = "");
+        DecisionMaker GetOrInsert(ObjectId gameId, ObjectId playerId, ObjectId persistentConnectionId, ConnectionType connectionType);
+
+        bool Update(DecisionMaker decisionMaker);
+
+        void Remove(DecisionMaker decisionMaker);
 
         bool ClearAllConnections();
 
         void ProcessPlayerEvent(ClientPlayerEventArgs playerEvent, ObjectId gameId, ObjectId playerId);
     }
 
-    public class ViewEventArgs : EventArgs
+    public class MessageEventArgs : EventArgs
     {
-        public ObjectId GameId { get; set; }
+        public string Message { get; set; }
+    }
 
+    public class ClientViewEventArgs : GameViewEventArgs
+    {
         public ObjectId PlayerId { get; set; }
+
+        public ObjectId GameId { get; set; }
 
         public IView View { get; set; }
     }
@@ -63,19 +80,20 @@ namespace GameLogic.External
             _playerCardManager = playerCardManager;
             _monsterCardManager = monsterCardManager;
 
-            _gameViewManager.UpdatedGameView += _gameViewManager_UpdatedGameView;
+            _gameViewManager.UpdatedGameView += _gameViewManager_UpdatedView;
 	    }
 
+        public event UpdatedViewEvent UpdatedPlayerViewEvent;
 
-        public event UpdatedViewEvent UpdatedViewEvent;
+        public event MessageEventHandler MessageEvent;
 
-        public void _gameViewManager_UpdatedGameView(object sender, GameViewEventArgs eventArgs)
+        public void _gameViewManager_UpdatedView(object sender, GameViewEventArgs eventArgs)
         {
-            if (UpdatedViewEvent != null)
+            if (UpdatedPlayerViewEvent != null)
             {
                 foreach (var player in eventArgs.Game.Players)
                 {
-                    UpdatedViewEvent(this, new ViewEventArgs()
+                    UpdatedPlayerViewEvent(this, new ClientViewEventArgs()
                     {
                         GameId = eventArgs.Game.Id,
                         PlayerId = player.Id,
@@ -85,38 +103,54 @@ namespace GameLogic.External
             }
         }
 
-        public IList<DecisionMaker> GetDecisionMakers(ObjectId gameId, ObjectId playerId)
+        public void MessageEventSafe(object sender, MessageEventArgs eventArgs)
+        {
+            if (MessageEvent != null)
+            {
+                MessageEvent(sender, eventArgs);
+            }
+        }
+
+        public List<DecisionMaker> GetDecisionMakers(ObjectId gameId, ObjectId playerId)
         {
             return _decisionMakerRepository.AsQueryable()
                 .Where(f => f.GameId.Equals(gameId) && f.PlayerId.Equals(playerId)).ToList();
         }
 
-        public DecisionMaker GetDecisionMaker(ConnectionType connectionType, string connectionId)
+        public DecisionMaker Get(ConnectionType connectionType, ObjectId connectionId)
         {
-            var data = _decisionMakerRepository.AsQueryable().ToList();
-            return data.Where(f => f.ConnectionType == connectionType && f.ConnectionId.Equals(connectionId)).FirstOrDefault();
+            return _decisionMakerRepository.AsQueryable().Where(f => f.ConnectionType == connectionType && f.ConnectionId.Equals(connectionId)).FirstOrDefault();
         }
 
-        public List<DecisionMaker> GetOrInsertDecisionMakers(ObjectId gameId, ObjectId playerId, ConnectionType connectionType, string connectionId)
+        public DecisionMaker GetOrInsert(ObjectId gameId, ObjectId playerId, ObjectId persistentConnectionId, ConnectionType connectionType)
         {
-            var result = GetDecisionMakers(gameId, playerId).ToList();
+            var result = Get(connectionType, persistentConnectionId);
 
-            if (result == null || !result.Any())
+            if (result == null)
             {
-                var decisionMaker = new DecisionMaker()
+                result = new DecisionMaker()
                 {
                     GameId = gameId,
                     PlayerId = playerId,
-                    ConnectionId = connectionId,
+                    ConnectionId = persistentConnectionId,
                     ConnectionType = connectionType
                 };
 
-                _decisionMakerRepository.Insert(decisionMaker);
+                _decisionMakerRepository.Insert(result);
 
-                result.Add(decisionMaker);
             }
 
             return result;
+        }
+
+        public bool Update(DecisionMaker decisionMaker)
+        {
+            return _decisionMakerRepository.Update(decisionMaker) != null;
+        }
+
+        public void Remove(DecisionMaker decisionMaker)
+        {
+            _decisionMakerRepository.Delete(decisionMaker);
         }
 
         public bool ClearAllConnections()
@@ -128,10 +162,10 @@ namespace GameLogic.External
         public GameView CreateGameView(Domain.Game game, Domain.Player p)
         {
             var result = new GameView();
-            foreach (var card in p.Hand)
-            {
-                result.CardIds.Add(card.Id);
-            }
+            result.GameId = game.Id;
+
+            result.PlayerCardIds.AddRange(p.Hand.Select(f => f.Id));
+            result.MonsterCardIds.AddRange(game.MonsterQueue.Select(f => f.Id));
 
             result.CurrentPlayer = CreatePlayerView(p);
             foreach (Domain.Player op in game.Players.Where(f => f.User.Id != p.User.Id))
@@ -145,6 +179,8 @@ namespace GameLogic.External
         public PlayerView CreatePlayerView(Domain.Player p)
         {
             var pv = new PlayerView();
+            pv.PlayerId = p.Id;
+
             pv.HandSize = p.Hand.Count();
             pv.PlayerAttack = _playerManager.CalculatePlayerAttack(p);
             pv.PlayerHold = _playerManager.CalculatePlayerHold(p);
@@ -152,6 +188,12 @@ namespace GameLogic.External
             pv.PlayerKeep = _playerManager.CalculatePlayerKeep(p);
             pv.PlayerSpeed = _playerManager.CalculatePlayerSpeed(p);
 
+            pv.ArmorCardIds.AddRange(p.Equipment.Where(f => f.EquipmentType == EquipmentType.Armor).Select(f => f.Id));
+            pv.BootsCardIds.AddRange(p.Equipment.Where(f => f.EquipmentType == EquipmentType.Boots).Select(f => f.Id));
+            pv.HelmetCardIds.AddRange(p.Equipment.Where(f => f.EquipmentType == EquipmentType.Helmet).Select(f => f.Id));
+            pv.HandCardIds.AddRange(p.Equipment.Where(f => f.EquipmentType == EquipmentType.Hand || f.EquipmentType == EquipmentType.TwoHand).Select(f => f.Id));
+            pv.OtherEquipmentCardIds.AddRange(p.Equipment.Where(f => f.EquipmentType == EquipmentType.Other).Select(f => f.Id));
+            
             return pv;
         }
 
@@ -160,7 +202,7 @@ namespace GameLogic.External
             var gv = CreateGameView(game, currentPlayer);
             foreach (var card in targetPlayer.Equipment)
             {
-                gv.CardIds.Add(card.Id);
+                gv.ChooseCardIds.Add(card.Id);
             }
 
             return gv;

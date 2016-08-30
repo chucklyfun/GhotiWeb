@@ -12,9 +12,9 @@ namespace GameLogic.Player
 
         bool ValidateEquipment(Domain.Player player, Domain.PlayerCard card);
 
-        bool KeepDrawCards(Domain.Player player, IList<Domain.PlayerCard> cards);
+        bool KeepDrawCards(Domain.Player player, List<Domain.PlayerCard> cards);
 
-        IList<Domain.PlayerCard> DiscardCard(Domain.Player player, Domain.PlayerCard card);
+        List<Domain.PlayerCard> DiscardCard(Domain.Player player, Domain.PlayerCard card);
 
         int CalculatePlayerAttack(Domain.Player player);
 
@@ -51,7 +51,7 @@ namespace GameLogic.Player
         public bool ValidateEquipment(Domain.Player player, Domain.PlayerCard card)
         {
             bool result = false;
-            IList<Domain.PlayerCard> compareableEquipment = null;
+            List<Domain.PlayerCard> compareableEquipment = null;
             if (card.EquipmentType == Domain.EquipmentType.TwoHand || card.EquipmentType == Domain.EquipmentType.Hand)
             {
                 var singleHand = player.Equipment.Where(f => f.EquipmentType == Domain.EquipmentType.Hand || f.EquipmentType == Domain.EquipmentType.TwoHand);
@@ -72,7 +72,7 @@ namespace GameLogic.Player
             return result;
         }
 
-        public bool KeepDrawCards(Domain.Player player, IList<Domain.PlayerCard> cards)
+        public bool KeepDrawCards(Domain.Player player, List<Domain.PlayerCard> cards)
         {
             var keepCards = cards.Intersect(player.DrawCards);
             var result = !(player.DrawCards.Count > keepCards.Count());
@@ -83,9 +83,9 @@ namespace GameLogic.Player
             return result;
         }
 
-        public IList<Domain.PlayerCard> DiscardCard(Domain.Player player, Domain.PlayerCard card)
+        public List<Domain.PlayerCard> DiscardCard(Domain.Player player, Domain.PlayerCard card)
         {
-            IList<Domain.PlayerCard> result = new List<Domain.PlayerCard>();
+            List<Domain.PlayerCard> result = new List<Domain.PlayerCard>();
 
             player.Equipment.Remove(card);
             result.Add(card);

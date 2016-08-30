@@ -1,46 +1,46 @@
-Name,Cost,ActionType,EquipmentType,ActionPowerBonus,ActionSpeedBonus,ActionDrawBonus,ActionKeepBonus,ActionAmbushMaxReward,EquipmentPowerBonus,EquipmentSpeedBonus,EquipmentDrawBonus,EquipmentKeepBonus,EquipmentHoldBonus,FileName,CardNumber
-Horseshoes,4,Attack,Shoes,6,1,0,0,0,2,2,0,0,0,~/Content/images/playercards/ghoti_pnp_01.png,1
-Socks,6,Ambush,Shoes,0,1,0,0,4,1,1,0,0,0,~/Content/images/playercards/ghoti_pnp_02.png,2
-Cute Boots,9,Draw,Shoes,0,0,3,2,0,3,4,0,0,0,~/Content/images/playercards/ghoti_pnp_03.png,3
-Buckets,3,Attack,Shoes,3,2,0,0,0,4,0,0,0,0,~/Content/images/playercards/ghoti_pnp_04.png,4
-Paint Cans,3,Ambush,Shoes,0,2,0,0,3,3,1,0,0,0,~/Content/images/playercards/ghoti_pnp_05.png,5
-CD Roms,0,Draw,Shoes,0,0,6,0,0,0,1,0,0,0,~/Content/images/playercards/ghoti_pnp_06.png,6
-Stilts,2,Attack,Shoes,1,3,0,0,0,0,2,0,0,0,~/Content/images/playercards/ghoti_pnp_07.png,7
-Hover Shoes,5,Ambush,Shoes,0,3,0,0,2,1,3,0,0,0,~/Content/images/playercards/ghoti_pnp_08.png,8
-Chalupas,1,Draw,Shoes,0,0,3,2,0,1,1,0,0,0,~/Content/images/playercards/ghoti_pnp_09.png,9
-Magical Cape,2,Attack,Armor,6,1,0,0,0,4,0,0,0,0,~/Content/images/playercards/ghoti_pnp_10.png,10
-Saddle Bags,6,Ambush,Armor,0,1,0,0,4,2,0,0,0,3,~/Content/images/playercards/ghoti_pnp_11.png,11
-Horse Armor,9,Draw,Armor,0,0,3,2,0,6,0,0,0,3,~/Content/images/playercards/ghoti_pnp_12.png,12
-Saddle,3,Attack,Armor,3,2,0,0,0,2,0,0,0,2,~/Content/images/playercards/ghoti_pnp_13.png,13
-Tortoise Shell,2,Ambush,Armor,0,2,0,0,3,4,-3,0,0,2,~/Content/images/playercards/ghoti_pnp_14.png,14
-Chicken Costume,0,Draw,Armor,0,0,6,0,0,1,0,0,0,2,~/Content/images/playercards/ghoti_pnp_15.png,15
-Cursed Amulet,2,Attack,Armor,1,3,0,0,0,3,0,0,0,1,~/Content/images/playercards/ghoti_pnp_16.png,16
-Fancy Dress,7,Ambush,Armor,0,3,0,0,2,3,0,0,0,3,~/Content/images/playercards/ghoti_pnp_17.png,17
-Medal Armor,3,Draw,Armor,0,0,3,2,0,6,0,0,0,1,~/Content/images/playercards/ghoti_pnp_18.png,18
-Duck,4,Attack,Helmet,6,1,0,0,0,2,0,1,0,0,~/Content/images/playercards/ghoti_pnp_19.png,19
-Fake Unicorn Horn,8,Ambush,Helmet,0,1,0,0,4,4,0,2,0,0,~/Content/images/playercards/ghoti_pnp_20.png,20
-Flower Hat,5,Draw,Helmet,0,0,3,2,0,3,0,1,0,0,~/Content/images/playercards/ghoti_pnp_21.png,21
-Pony Ears,5,Attack,Helmet,3,2,0,0,0,3,0,1,0,0,~/Content/images/playercards/ghoti_pnp_22.png,22
-Bunny Hat,4,Ambush,Helmet,0,2,0,0,3,2,0,1,0,0,~/Content/images/playercards/ghoti_pnp_23.png,23
-Cowpony Hat,7,Draw,Helmet,0,0,6,0,0,3,0,2,0,0,~/Content/images/playercards/ghoti_pnp_24.png,24
-Fake Beard,6,Attack,Helmet,1,3,0,0,0,2,0,1,0,0,~/Content/images/playercards/ghoti_pnp_25.png,25
-Ribbon,4,Ambush,Helmet,0,3,0,0,2,4,0,2,0,0,~/Content/images/playercards/ghoti_pnp_26.png,26
-Mailbox,8,Draw,Helmet,0,0,3,2,0,8,0,3,0,0,~/Content/images/playercards/ghoti_pnp_27.png,27
-Rocket Propelled Chainsaw Launcher,9,Attack,Hands,6,1,0,0,0,12,0,0,0,0,~/Content/images/playercards/ghoti_pnp_28.png,28
-Chainsaw Nunchucks,9,Ambush,Hands,0,1,0,0,4,9,0,0,1,0,~/Content/images/playercards/ghoti_pnp_29.png,29
-Feather,6,Draw,Hands,0,0,3,2,0,7,0,0,1,0,~/Content/images/playercards/ghoti_pnp_30.png,30
-Creepy Doll,5,Attack,Hands,3,2,0,0,0,1,0,0,2,0,~/Content/images/playercards/ghoti_pnp_31.png,31
-Portable Hole,4,Ambush,Hands,0,2,0,0,3,4,0,0,1,0,~/Content/images/playercards/ghoti_pnp_32.png,32
-Lasso,6,Draw,Hands,0,0,6,0,0,1,0,1,1,0,~/Content/images/playercards/ghoti_pnp_33.png,33
-Dictionary,6,Attack,Hands,1,3,0,0,0,2,0,1,2,0,~/Content/images/playercards/ghoti_pnp_34.png,34
-Popsicle,7,Ambush,Hands,0,3,0,0,2,1,0,0,1,0,~/Content/images/playercards/ghoti_pnp_35.png,35
-Innocent Bystander,2,Draw,Hands,0,0,3,2,0,3,0,0,1,0,~/Content/images/playercards/ghoti_pnp_36.png,36
-Bagpipes,9,Attack,Hands,6,1,0,0,0,7,0,0,2,0,~/Content/images/playercards/ghoti_pnp_37.png,37
-Card Game,5,Ambush,Hands,0,1,0,0,4,9,0,0,2,0,~/Content/images/playercards/ghoti_pnp_38.png,38
-Feather Duster,9,Draw,Hands,0,0,3,2,0,2,0,0,2,0,~/Content/images/playercards/ghoti_pnp_39.png,39
-Gatling Shotgun,8,Attack,Hands,3,2,0,0,0,3,0,0,0,0,~/Content/images/playercards/ghoti_pnp_40.png,40
-Human Hands,7,Ambush,Hands,0,2,0,0,3,9,0,0,1,0,~/Content/images/playercards/ghoti_pnp_41.png,41
-Floss,0,Draw,Hands,0,0,6,0,0,3,0,0,1,0,~/Content/images/playercards/ghoti_pnp_42.png,42
-Ancient Tuba,5,Attack,Hands,1,3,0,0,0,8,0,0,0,0,~/Content/images/playercards/ghoti_pnp_43.png,43
-Abacus,0,Ambush,Hands,0,3,0,0,2,3,0,0,0,0,~/Content/images/playercards/ghoti_pnp_44.png,44
-Cider Mug,6,Draw,Hands,0,0,3,2,0,4,0,0,1,0,~/Content/images/playercards/ghoti_pnp_45.png,45
+Name,Cost,ActionType,EquipmentType,ActionPowerBonus,ActionSpeedBonus,ActionDrawBonus,ActionKeepBonus,ActionAmbushMaxReward,EquipmentPowerBonus,EquipmentSpeedBonus,EquipmentDrawBonus,EquipmentKeepBonus,EquipmentHoldBonus,FileName,CardNumber,Id
+Horseshoes,4,Attack,Shoes,6,1,0,0,0,2,2,0,0,0,~/Content/images/playercards/ghoti_pnp_01.png,1,5724c1e05a5a1e3c24f76ac0
+Socks,6,Ambush,Shoes,0,1,0,0,4,1,1,0,0,0,~/Content/images/playercards/ghoti_pnp_02.png,2,5724c1e65a5a1e3c24f76ac1
+Cute Boots,9,Draw,Shoes,0,0,3,2,0,3,4,0,0,0,~/Content/images/playercards/ghoti_pnp_03.png,3,5724c1e65a5a1e3c24f76ac2
+Buckets,3,Attack,Shoes,3,2,0,0,0,4,0,0,0,0,~/Content/images/playercards/ghoti_pnp_04.png,4,5724c1e65a5a1e3c24f76ac3
+Paint Cans,3,Ambush,Shoes,0,2,0,0,3,3,1,0,0,0,~/Content/images/playercards/ghoti_pnp_05.png,5,5724c1e65a5a1e3c24f76ac4
+CD Roms,0,Draw,Shoes,0,0,6,0,0,0,1,0,0,0,~/Content/images/playercards/ghoti_pnp_06.png,6,5724c1e65a5a1e3c24f76ac5
+Stilts,2,Attack,Shoes,1,3,0,0,0,0,2,0,0,0,~/Content/images/playercards/ghoti_pnp_07.png,7,5724c1e65a5a1e3c24f76ac6
+Hover Shoes,5,Ambush,Shoes,0,3,0,0,2,1,3,0,0,0,~/Content/images/playercards/ghoti_pnp_08.png,8,5724c1e65a5a1e3c24f76ac7
+Chalupas,1,Draw,Shoes,0,0,3,2,0,1,1,0,0,0,~/Content/images/playercards/ghoti_pnp_09.png,9,5724c1e65a5a1e3c24f76ac8
+Magical Cape,2,Attack,Armor,6,1,0,0,0,4,0,0,0,0,~/Content/images/playercards/ghoti_pnp_10.png,10,5724c1e65a5a1e3c24f76ac9
+Saddle Bags,6,Ambush,Armor,0,1,0,0,4,2,0,0,0,3,~/Content/images/playercards/ghoti_pnp_11.png,11,5724c1e65a5a1e3c24f76aca
+Horse Armor,9,Draw,Armor,0,0,3,2,0,6,0,0,0,3,~/Content/images/playercards/ghoti_pnp_12.png,12,5724c1e65a5a1e3c24f76acb
+Saddle,3,Attack,Armor,3,2,0,0,0,2,0,0,0,2,~/Content/images/playercards/ghoti_pnp_13.png,13,5724c1e65a5a1e3c24f76acc
+Tortoise Shell,2,Ambush,Armor,0,2,0,0,3,4,-3,0,0,2,~/Content/images/playercards/ghoti_pnp_14.png,14,5724c1e65a5a1e3c24f76acd
+Chicken Costume,0,Draw,Armor,0,0,6,0,0,1,0,0,0,2,~/Content/images/playercards/ghoti_pnp_15.png,15,5724c1e65a5a1e3c24f76ace
+Cursed Amulet,2,Attack,Armor,1,3,0,0,0,3,0,0,0,1,~/Content/images/playercards/ghoti_pnp_16.png,16,5724c1e65a5a1e3c24f76acf
+Fancy Dress,7,Ambush,Armor,0,3,0,0,2,3,0,0,0,3,~/Content/images/playercards/ghoti_pnp_17.png,17,5724c1e65a5a1e3c24f76ad0
+Medal Armor,3,Draw,Armor,0,0,3,2,0,6,0,0,0,1,~/Content/images/playercards/ghoti_pnp_18.png,18,5724c1e65a5a1e3c24f76ad1
+Duck,4,Attack,Helmet,6,1,0,0,0,2,0,1,0,0,~/Content/images/playercards/ghoti_pnp_19.png,19,5724c1e65a5a1e3c24f76ad2
+Fake Unicorn Horn,8,Ambush,Helmet,0,1,0,0,4,4,0,2,0,0,~/Content/images/playercards/ghoti_pnp_20.png,20,5724c1e65a5a1e3c24f76ad3
+Flower Hat,5,Draw,Helmet,0,0,3,2,0,3,0,1,0,0,~/Content/images/playercards/ghoti_pnp_21.png,21,5724c1e65a5a1e3c24f76ad4
+Pony Ears,5,Attack,Helmet,3,2,0,0,0,3,0,1,0,0,~/Content/images/playercards/ghoti_pnp_22.png,22,5724c1e65a5a1e3c24f76ad5
+Bunny Hat,4,Ambush,Helmet,0,2,0,0,3,2,0,1,0,0,~/Content/images/playercards/ghoti_pnp_23.png,23,5724c1e65a5a1e3c24f76ad6
+Cowpony Hat,7,Draw,Helmet,0,0,6,0,0,3,0,2,0,0,~/Content/images/playercards/ghoti_pnp_24.png,24,5724c1e65a5a1e3c24f76ad7
+Fake Beard,6,Attack,Helmet,1,3,0,0,0,2,0,1,0,0,~/Content/images/playercards/ghoti_pnp_25.png,25,5724c1e65a5a1e3c24f76ad8
+Ribbon,4,Ambush,Helmet,0,3,0,0,2,4,0,2,0,0,~/Content/images/playercards/ghoti_pnp_26.png,26,5724c1e65a5a1e3c24f76ad9
+Mailbox,8,Draw,Helmet,0,0,3,2,0,8,0,3,0,0,~/Content/images/playercards/ghoti_pnp_27.png,27,5724c1e65a5a1e3c24f76ada
+Rocket Propelled Chainsaw Launcher,9,Attack,Hands,6,1,0,0,0,12,0,0,0,0,~/Content/images/playercards/ghoti_pnp_28.png,28,5724c1e65a5a1e3c24f76adb
+Chainsaw Nunchucks,9,Ambush,Hands,0,1,0,0,4,9,0,0,1,0,~/Content/images/playercards/ghoti_pnp_29.png,29,5724c1e65a5a1e3c24f76adc
+Feather,6,Draw,Hands,0,0,3,2,0,7,0,0,1,0,~/Content/images/playercards/ghoti_pnp_30.png,30,5724c1e65a5a1e3c24f76add
+Creepy Doll,5,Attack,Hands,3,2,0,0,0,1,0,0,2,0,~/Content/images/playercards/ghoti_pnp_31.png,31,5724c1e65a5a1e3c24f76ade
+Portable Hole,4,Ambush,Hands,0,2,0,0,3,4,0,0,1,0,~/Content/images/playercards/ghoti_pnp_32.png,32,5724c1e65a5a1e3c24f76adf
+Lasso,6,Draw,Hands,0,0,6,0,0,1,0,1,1,0,~/Content/images/playercards/ghoti_pnp_33.png,33,5724c1e65a5a1e3c24f76ae0
+Dictionary,6,Attack,Hands,1,3,0,0,0,2,0,1,2,0,~/Content/images/playercards/ghoti_pnp_34.png,34,5724c1e65a5a1e3c24f76ae1
+Popsicle,7,Ambush,Hands,0,3,0,0,2,1,0,0,1,0,~/Content/images/playercards/ghoti_pnp_35.png,35,5724c1e65a5a1e3c24f76ae2
+Innocent Bystander,2,Draw,Hands,0,0,3,2,0,3,0,0,1,0,~/Content/images/playercards/ghoti_pnp_36.png,36,5724c1e65a5a1e3c24f76ae3
+Bagpipes,9,Attack,Hands,6,1,0,0,0,7,0,0,2,0,~/Content/images/playercards/ghoti_pnp_37.png,37,5724c1e65a5a1e3c24f76ae4
+Card Game,5,Ambush,Hands,0,1,0,0,4,9,0,0,2,0,~/Content/images/playercards/ghoti_pnp_38.png,38,5724c1e65a5a1e3c24f76ae5
+Feather Duster,9,Draw,Hands,0,0,3,2,0,2,0,0,2,0,~/Content/images/playercards/ghoti_pnp_39.png,39,5724c1e65a5a1e3c24f76ae6
+Gatling Shotgun,8,Attack,Hands,3,2,0,0,0,3,0,0,0,0,~/Content/images/playercards/ghoti_pnp_40.png,40,5724c1e65a5a1e3c24f76ae7
+Human Hands,7,Ambush,Hands,0,2,0,0,3,9,0,0,1,0,~/Content/images/playercards/ghoti_pnp_41.png,41,5724c1e65a5a1e3c24f76ae8
+Floss,0,Draw,Hands,0,0,6,0,0,3,0,0,1,0,~/Content/images/playercards/ghoti_pnp_42.png,42,5724c1e65a5a1e3c24f76ae9
+Ancient Tuba,5,Attack,Hands,1,3,0,0,0,8,0,0,0,0,~/Content/images/playercards/ghoti_pnp_43.png,43,5724c1e65a5a1e3c24f76aea
+Abacus,0,Ambush,Hands,0,3,0,0,2,3,0,0,0,0,~/Content/images/playercards/ghoti_pnp_44.png,44,5724c1e65a5a1e3c24f76aeb
+Cider Mug,6,Draw,Hands,0,0,3,2,0,4,0,0,1,0,~/Content/images/playercards/ghoti_pnp_45.png,45,5724c1e65a5a1e3c24f76aec

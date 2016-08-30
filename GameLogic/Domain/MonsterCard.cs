@@ -12,7 +12,7 @@ namespace GameLogic.Domain
         public int Power { get; set; }
         public string Name { get; set; }
         public int CardNumber { get; set; }
-        public IList<int> Treasures { get; set; }
+        public List<int> Treasures { get; set; }
         public string ImageUrl { get; set; }
         public string Description { get; set; }
 

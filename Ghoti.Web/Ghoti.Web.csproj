@@ -814,19 +814,19 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="App_Start\NinjectWebCommon.cs" />
     <Compile Include="Controllers\CrudController.cs" />
     <Compile Include="Controllers\GameConnectionController.cs" />
     <Compile Include="Controllers\GameController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\UserController.cs" />
     <Compile Include="Controllers\UtilitiesController.cs" />
-    <Compile Include="Nancy\Bootstrapper.cs" />
     <Compile Include="Nancy\IocModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="App_Data\Startup.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="App_Start\" />
+  </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
     <Content Include="content\public\img\.gitignore" />

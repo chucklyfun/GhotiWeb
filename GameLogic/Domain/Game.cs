@@ -12,7 +12,7 @@ namespace GameLogic.Domain
     {
         public string Version { get; set; }
 
-        public IList<Domain.Player> Players { get; set; }
+        public List<Domain.Player> Players { get; set; }
         public Domain.Player CurrentPlayer { get; set; }
 
         public Queue<MonsterCard> MonsterQueue { get; set; }

@@ -5,6 +5,8 @@ using System.Text;
 using GameLogic.Game;
 using Utilities.Data;
 using GameLogic.Domain;
+using MongoDB.Bson;
+using System.Threading;
 
 namespace DataInitializer
 {
@@ -13,6 +15,8 @@ namespace DataInitializer
         void InitializeAdminUser();
 
         void InitializePlayers(int count);
+
+        List<string> GenerateObjectIds(int count);
     }
 
     public class Initializer : IInitializer
@@ -49,6 +53,18 @@ namespace DataInitializer
                 _userRepository.Insert(
                     new User() { Email = username, FullName = _loremIpsum.GetName(2), UserName = username, ShortName = _loremIpsum.GetName(1) });
             }
+        }
+
+        public List<string> GenerateObjectIds(int count)
+        {
+            var result = new List<string>();
+
+            for (int i = 0; i < count; ++i)
+            {
+                result.Add(ObjectId.GenerateNewId().ToString());
+            }
+
+            return result;
         }
     }
 }

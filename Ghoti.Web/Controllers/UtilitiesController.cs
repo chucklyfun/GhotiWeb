@@ -6,12 +6,13 @@ using PagedList;
 using MongoDB.Bson;
 using Nancy.ModelBinding;
 using DataInitializer;
+using GameLogic.External;
 
 namespace ghoti.web.Controllers
 {
     public class UtilitiesController : Nancy.NancyModule
     {
-        public UtilitiesController(ISettingsManager settingsManager, ISerializationService serializationService, IInitializer initializer)
+        public UtilitiesController(ISettingsManager settingsManager, ISerializationService serializationService, IInitializer initializer, IDecisionMakerManager decisionMakerManager)
         {
             Get["/api/Utilities/Configuration/Get"] = _ =>
             {
@@ -39,6 +40,17 @@ namespace ghoti.web.Controllers
                 initializer.InitializeAdminUser();
                 initializer.InitializePlayers(10);
                 return true;
+            };
+
+
+            Get["/api/Utilities/CreateObjectId"] = _ =>
+            {
+                return ObjectId.GenerateNewId();
+            };
+
+            Get["/api/Utilities/Configuration/CreateIds/{count}"] = _ =>
+            {
+                return serializationService.Serialize(initializer.GenerateObjectIds(_.count));
             };
         }
     }

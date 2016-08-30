@@ -28,7 +28,7 @@ angular.module('routerApp').controller('StartController', ['$scope', '$http', '$
         $scope.games = [];
         $scope.playerCols = [
             {   name: 'Add Player',
-            cellTemplate: '<button id="btnAddPlayer" type="button" class="btn btn-primary ng-click="grid.appScope.addPlayer(row.entity)" >Add Player</button>'
+            cellTemplate: '<button id="btnAddPlayer" type="button" class="btn btn-primary" ng-click="grid.appScope.addPlayer(row.entity)" >Add Player</button>'
             },
             {   name: 'Username',
                 field: 'UserName',
@@ -105,7 +105,7 @@ angular.module('routerApp').controller('StartController', ['$scope', '$http', '$
 
     $scope.startGame = function () {
         if ($scope.gv.Players.length >= 2) {
-            $state.go('test-game', { id: $scope.gv.Id });
+            $state.go('test-game', { Id: $scope.gv.Id });
         }
     };
 }]);

@@ -10,15 +10,15 @@ namespace GameLogic.Deck
 {
     public interface ICardUtilities<T>
     {
-        void Shuffle(Deck<T> deck);
-        void RefillDrawPile(Deck<T> deck);
+        void Shuffle(Domain.Deck<T> deck);
+        void RefillDrawPile(Domain.Deck<T> deck);
     }
 
     
 
     public class CardUtilities<T> : ICardUtilities<T>
     {
-        public void RefillDrawPile(Deck<T> deck)
+        public void RefillDrawPile(Domain.Deck<T> deck)
         {
             foreach (var card in deck.DiscardPile)
             {
@@ -28,7 +28,7 @@ namespace GameLogic.Deck
             deck.DiscardPile.Clear();
         }
 
-        public void Shuffle(Deck<T> deck)
+        public void Shuffle(Domain.Deck<T> deck)
         {
             RNGCryptoServiceProvider provider = new RNGCryptoServiceProvider();
             

@@ -41,7 +41,10 @@ angular.module('routerApp').controller('GameController', ['$rootScope', '$scope'
             };
         }
 
+        $scope.hubs = {};
+        $scope.PlayersMap = {};
         $scope.Players = [];
+        $scope.ServerViews = {};
 
         $scope.gameCols =
             [
@@ -82,117 +85,120 @@ angular.module('routerApp').controller('GameController', ['$rootScope', '$scope'
             ];
             
 
-        
-
-        $scope.AddHub = function (game, player)
+        $rootScope.getNewConnectionId = function()
         {
-            var h = connection.initialize(game.Id, player.Id);
+            return $http({ method: 'GET', url: 'api/Utilities/CreateObjectId' });
+        }
+
+        $scope.AddHub = function (gameId, player, connectionId) {
+            var h = connection.initialize(gameId, player.Id, connectionId);
+
             h.connection.start().done(function () {
                 console.log('Now connected, connection ID=' + h.connection.id);
 
-                h.connected();
-
-                $scope.hubs.push(h);
-                $scope.Players.push($scope.createPlayerView(player, h.connection.id));
+                $scope.hubs[player.Id] = h;
+                $scope.PlayersMap[player.Id] = $scope.createPlayerView(player, h.connection.id);
                 $scope.$apply();
-            })
-                .fail(function () {
-                    console.log('Could not Connect!');
-                });
-        }
+            }).fail(function () {
+                console.log('Could not Connect!');
+            });
+        };
 
         $scope.init = function ()
         {
-            //$gameRest.get($stateParams.Id).success(function (data)
-            $gameRest.get('56a5b5d95a5a541ee00d5a3d').success(function (data)
-            {
-                $scope.gv = data;
-                $scope.hubs = [];
+            $scope.gameId = $stateParams.Id;
 
-                for (var p in $scope.gv.Players)
-                {
-                    $scope.AddHub($scope.gv, $scope.gv.Players[p]);
-                }
-            });            
+            $gameRest.getPlayers($scope.gameId)
+                .success(function (data) {
+                    $scope.Players = data;
+
+                    for (var p in $scope.Players)
+                    {
+                        var player = data[p];
+                        $scope.PlayersMap[player.Id] = player;
+
+                        $rootScope.getNewConnectionId()
+                            .success(function (newId) {
+                                $scope.AddHub($scope.gameId, player, newId);
+                            })
+                        
+                    }
+                });
         };
 
-    $scope.toggleCard = function(playerId, cardId)
-    {
-        var playerView = $scope.Players.find(function (f) { f.PlayerId == playerId })
-        if (playerView != undefined)
+        $scope.toggleCard = function(playerId, cardId)
         {
-            playerView.SelectedCards.indexOf(cardId);
-
-            if (index < 0) {
-                $scope.SelectedCards[playerId].push(c);
-            }
-            else {
-                $scope.SelectedCards[playerId].splice(index, 1);
-            }
-        }
-        else
-        {
-            $scope.error = 'toggleCard: Unable to find player view.'
-        }
-
-        
-    }
-
-    $scope.GetPlayerView = function(playerId)
-    {
-        return $scope.Players.find(function (f) { return f.PlayerId == playerId });
-    }
-
-    $scope.GetHub = function (hubId) {
-        return $scope.hubs.find(function (f) { return f.connection.id == hubId });
-    }
-
-    $scope.Action = function (playerId, action) {
-        var playerView = $scope.GetPlayerView(playerId);
-
-        var selectedCards = [];
-
-        if (playerView != undefined)
-        {
-            selectedCards = playerView.SelectedCards;
-
-            var playerEvent =
-                {
-                    Action: action.value,
-                    Cards: selectedCards
-                };
-
-
-            var hub = $scope.GetHub(playerView.HubId);
-
-            if (hub != undefined)
+            var playerView = $scope.PlayersMap[playerId];
+            if (playerView != undefined)
             {
-                hub.send(playerEvent);
+                var index = playerView.SelectedCards.indexOf(cardId);
 
-                playerView.SelectedCards = [];
+                if (index < 0) {
+                    $scope.SelectedCards[playerId].push(c);
+                }
+                else {
+                    $scope.SelectedCards[playerId].splice(index, 1);
+                }
             }
             else
             {
-                $scope.error = 'Unable to find hub: ' + playerView.HubId;
-            }
+                $scope.error = 'toggleCard: Unable to find player view.'
+            }        
         }
+
+        $scope.ping = function () {
+            $http({ method: 'GET', url: 'api/game/Ping' }).success(function (data)
+            {
+                console.log(data);
+            });
+        }
+
+        $scope.Action = function (playerId, action) {
+            var playerView = $scope.PlayersMap[playerId];
+
+            var selectedCards = [];
+
+            if (playerView != undefined)
+            {
+                selectedCards = playerView.SelectedCards;
+
+                var playerEvent =
+                    {
+                        Action: action.value,
+                        Cards: selectedCards
+                    };
+
+
+                var hub = $scope.hubs[playerView.PlayerId];
+
+                if (hub != undefined)
+                {
+                    hub.send(playerEvent);
+
+                    playerView.SelectedCards = [];
+                }
+                else
+                {
+                    $scope.error = 'Unable to find hub: ' + playerView.HubId;
+                }
+            }
         
-    };
+        };
 
-    $scope.ClientTest = function () {
-        $http({ method: 'GET', url: 'api/game/clienttest' });
-    };
+        $scope.ClientTest = function () {
+            $http({ method: 'GET', url: 'api/game/clienttest' });
+        };
 
-    $scope.showcards = function()
-    {
-        $http({method: 'GET', url: 'api/game/getcard'})
-            .success(function(data)
-                {
-                    $scope.gv.Cards.push(data);
-                })
-            .error(function(data)
-                {
-                    $scope.error = data;
-                });
-    };
+        $scope.showcards = function()
+        {
+            $http({method: 'GET', url: 'api/game/getcard'})
+                .success(function(data)
+                    {
+                        $scope.gv.Cards.push(data);
+                    })
+                .error(function(data)
+                    {
+                        $scope.error = data;
+                    });
+        };
 }]);

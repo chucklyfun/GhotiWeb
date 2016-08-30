@@ -21,7 +21,7 @@ namespace GameLogic.Test
             var cardUtilities = testKernel.Get<CardUtilities<Domain.Player>>();
 
 
-            var deck = new Deck<Domain.Player>();
+            var deck = new Domain.Deck<Domain.Player>();
 
             var card1 = testKernel.GetMock<Domain.Player>();
             deck.DiscardPile.Add(card1.Object);

@@ -8,26 +8,33 @@ namespace GameLogic.External
 {
     public interface IView
     {
+    }
 
+    public class MessageView : IView
+    {
+        public string Data { get; set; }
     }
 
     public class GameView : IView
     {
-        public IList<ObjectId> CardIds { get; set; }
+        public ObjectId GameId { get; set; }
         public PlayerView CurrentPlayer { get; set; }
-        public IList<PlayerView> OtherPlayers { get; set; }
-
-        public IList<ObjectId> HandCardIds { get; set; }
-        public IList<ObjectId> HelmetCardIds { get; set; }
-        public IList<ObjectId> BootsCardIds { get; set; }
-        public IList<ObjectId> ArmorCardIds { get; set; }
-        public IList<ObjectId> OtherEquipmentCardIds { get; set; }
-
+        public List<ObjectId> ChooseCardIds { get; set; }
+        public List<PlayerView> OtherPlayers { get; set; }
+        public List<ObjectId> PlayerCardIds { get; set; }
+        public List<ObjectId> MonsterCardIds { get; set; }
 
         public ServerToClientAction CurrentAction { get; set; }
+
+        public GameView()
+        {
+            OtherPlayers = new List<PlayerView>();
+            PlayerCardIds = new List<ObjectId>();
+            MonsterCardIds = new List<ObjectId>();
+        }
     }
 
-    public class PlayerView : IView
+    public class PlayerView
     {
         public ObjectId PlayerId { get; set; }
 
@@ -39,13 +46,33 @@ namespace GameLogic.External
         public int PlayerHold { get; set; }
         public int PlayerDraw { get; set; }
         public int PlayerKeep { get; set; }
+
+        public List<ObjectId> HelmetCardIds { get; set; }
+        public List<ObjectId> BootsCardIds { get; set; }
+        public List<ObjectId> ArmorCardIds { get; set; }
+        public List<ObjectId> HandCardIds { get; set; }
+        public List<ObjectId> OtherEquipmentCardIds { get; set; }
+
+        public PlayerView()
+        {
+            HelmetCardIds = new List<ObjectId>();
+            BootsCardIds = new List<ObjectId>();
+            ArmorCardIds = new List<ObjectId>();
+            HandCardIds = new List<ObjectId>();
+            OtherEquipmentCardIds = new List<ObjectId>();
+        }
     }
 
     public class GameAction
     {
         public ObjectId PlayerId { get; set; }
         public ObjectId TargetPlayerId { get; set; }
-        public IList<ObjectId> CardIds { get; set; }
+        public List<ObjectId> CardIds { get; set; }
         public ClientToServerAction Action { get; set; }
+
+        public GameAction()
+        {
+            CardIds = new List<ObjectId>();
+        }
     }
 }

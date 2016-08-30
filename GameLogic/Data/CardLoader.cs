@@ -40,6 +40,15 @@ namespace GameLogic.Data
                     int intValue = 0;
                     string stringValue = string.Empty;
 
+
+                    if (csvHelper.TryGetField("Id", out stringValue))
+                    {
+                        card.Id = new MongoDB.Bson.ObjectId(stringValue);
+                    }
+                    if (csvHelper.TryGetField("CardNumber", out intValue))
+                    {
+                        card.CardNumber = intValue;
+                    }
                     if (csvHelper.TryGetField("Name", out stringValue))
                     {
                         card.Name = stringValue;
@@ -115,6 +124,15 @@ namespace GameLogic.Data
                     int intValue = 0;
                     string stringValue = string.Empty;
 
+
+                    if (csvHelper.TryGetField("Id", out stringValue))
+                    {
+                        card.Id = new MongoDB.Bson.ObjectId(stringValue);
+                    }
+                    if (csvHelper.TryGetField("CardNumber", out intValue))
+                    {
+                        card.CardNumber = intValue;
+                    }
                     if (csvHelper.TryGetField<string>("Name", out stringValue))
                     {
                         card.Name = stringValue;

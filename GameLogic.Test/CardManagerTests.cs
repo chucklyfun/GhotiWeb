@@ -25,7 +25,7 @@ namespace GameLogic.Test
             var cardUtilitiesMock = testKernel.GetMock<ICardUtilities<Domain.PlayerCard>>();
 
 
-            var deck = new Deck<Domain.PlayerCard>();
+            var deck = new Domain.Deck<Domain.PlayerCard>();
 
             var card1 = testKernel.GetMock<Domain.PlayerCard>();
             deck.DrawPile.Push(card1.Object);
@@ -56,7 +56,7 @@ namespace GameLogic.Test
             var cardUtilitiesMock = testKernel.GetMock<ICardUtilities<Domain.PlayerCard>>();
 
 
-            var deck = new Deck<Domain.PlayerCard>();
+            var deck = new Domain.Deck<Domain.PlayerCard>();
 
             var card1 = testKernel.GetMock<Domain.PlayerCard>();
             deck.DiscardPile.Add(card1.Object);

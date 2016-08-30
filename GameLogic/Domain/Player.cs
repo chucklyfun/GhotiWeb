@@ -13,18 +13,18 @@ namespace GameLogic.Domain
         {
             Hand = new List<PlayerCard>();
             DrawCards = new List<PlayerCard>();
+            Equipment = new List<PlayerCard>();
             Victories = 0;
             Name = string.Empty;
         }
 
-
         public string Name { get; set; }
         public int PlayerNumber { get; set; }
-        public IList<PlayerCard> Hand { get; set; }
-        public IList<PlayerCard> DrawCards { get; set; }
+        public List<PlayerCard> Hand { get; set; }
+        public List<PlayerCard> DrawCards { get; set; }
         public int Victories { get; set; }
         public User User { get; set; }
 
-        public IList<PlayerCard> Equipment { get; set; }   
+        public List<PlayerCard> Equipment { get; set; }   
     }
 }

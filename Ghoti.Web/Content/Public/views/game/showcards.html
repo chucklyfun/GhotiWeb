@@ -1,6 +1,6 @@
 <div data-ng-controller="GameController" data-ng-init="init()">
     <label>{{game.Id}}</label>
     <label>{{data}}</label>
-
+    <button ng-click="ping()">Ping</button>
     <div ui-grid="{ data: Players, columnDefs: gameCols }" style="height:400px" />
 </div>

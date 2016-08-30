@@ -7,6 +7,7 @@ using Utilities.Data;
 using MongoDB.Bson;
 using Utilities;
 using GameLogic.Domain;
+using GameLogic.External;
 
 namespace ghoti.web.Controllers
 {
@@ -20,7 +21,7 @@ namespace ghoti.web.Controllers
         private readonly IRepository<User> _userRepository;
         private readonly ISerializationService _serializationService;
 
-        public GameController(IGameServices gameServices, IRepository<User> userRepository, IRepository<Game> gameRepository, ISerializationService serializationService)
+        public GameController(IGameServices gameServices, IRepository<User> userRepository, IRepository<Game> gameRepository, ISerializationService serializationService, IDecisionMakerManager decisionMakerManager)
         {
             _gameServices = gameServices;
             _userRepository = userRepository;
@@ -54,6 +55,19 @@ namespace ghoti.web.Controllers
                     return result;
                 };
 
+            Get["/api/Game/{gameId}/Players"] = (_) =>
+            {
+                var result = new List<Player>();
+                var game = _gameRepository.GetById(new ObjectId(_.gameId));
+
+                if (game != null)
+                {
+                    result.AddRange(game.Players);
+                }
+
+                return result;
+            };
+
             Put["/api/Game"] = (_) =>
                 {
                     var game = _ as Game;
@@ -71,6 +85,16 @@ namespace ghoti.web.Controllers
                     _gameRepository.RemoveAll();
                     return true;
                 };
+
+            Get["/api/game/Ping"] = _ =>
+            {
+                decisionMakerManager.MessageEventSafe(this, new MessageEventArgs()
+                {
+                    Message = "Ping"
+                });
+             
+                return serializationService.Serialize<bool>(true);
+            };
         }
     }
 }

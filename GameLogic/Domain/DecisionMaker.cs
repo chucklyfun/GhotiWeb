@@ -10,7 +10,7 @@ namespace GameLogic.Domain
     {
         public ObjectId Id { get; set; }
 
-        public string ConnectionId { get; set; }
+        public ObjectId ConnectionId { get; set; }
         public ObjectId GameId { get; set; }
         public ObjectId PlayerId { get; set; }        
 

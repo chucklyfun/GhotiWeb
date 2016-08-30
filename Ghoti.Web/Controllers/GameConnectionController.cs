@@ -22,61 +22,97 @@ namespace ghoti.web.Controllers
         private IDecisionMakerManager _decisionMakerManager{ get; set; }
         private ISignalRDecisionConnectionFactory _signalRDecisionConnectionFactory { get; set; }
         private ISerializationService _serializationService { get; set; }
+
+        public Dictionary<ObjectId, string> ConnectionIds { get; set; }
         
-        public Gamehub()
+        public Gamehub(IDecisionMakerManager decisionMakerManager, ISignalRDecisionConnectionFactory signalRDecisionConnectionFactory, ISerializationService serializationService)
         {
-            _decisionMakerManager = Ghoti.Web.Nancy.Bootstrapper.Kernel.Get<IDecisionMakerManager>();
-            _signalRDecisionConnectionFactory = Ghoti.Web.Nancy.Bootstrapper.Kernel.Get<ISignalRDecisionConnectionFactory>();
+            _decisionMakerManager = decisionMakerManager;
+            _signalRDecisionConnectionFactory = signalRDecisionConnectionFactory;
+            _serializationService = serializationService;
             
-            _decisionMakerManager.UpdatedViewEvent += decisionMakerManager_UpdatedView;
+            _decisionMakerManager.UpdatedPlayerViewEvent +=_decisionMakerManager_UpdatedPlayerViewEvent;
+            _decisionMakerManager.MessageEvent += _decisionMakerManager_MessageEvent;
+
+            ConnectionIds = new Dictionary<ObjectId, string>();
         }
 
-        public void decisionMakerManager_UpdatedView(object sender, ViewEventArgs eventArgs)
+
+        public void _decisionMakerManager_UpdatedPlayerViewEvent(object sender, ClientViewEventArgs eventArgs)
         {
-            var decisionMakers = _decisionMakerManager.GetOrInsertDecisionMakers(eventArgs.GameId, eventArgs.PlayerId, ConnectionType.SignalR);
+            var decisionMakers = _decisionMakerManager.GetDecisionMakers(eventArgs.GameId, eventArgs.PlayerId);
 
             foreach(var decisionMaker in decisionMakers)
             {
-                SendMessageFromServer(_serializationService.Serialize(eventArgs.View), decisionMaker.Id.ToString());
+                SendMessageToClient(_serializationService.Serialize(eventArgs.View), decisionMaker.ConnectionId);
             }
             
         }
 
-        public void connected()
+        public void _decisionMakerManager_MessageEvent(object sender, MessageEventArgs eventArgs)
         {
-            System.Console.WriteLine("OnConnected");
-
-            var playerId = new ObjectId(Context.QueryString["playerId"]);
-            var gameId = new ObjectId(Context.QueryString["gameId"]);
-
-            var decisionMaker = _decisionMakerManager.GetOrInsertDecisionMakers(gameId, playerId, ConnectionType.SignalR, Context.ConnectionId);
-
-
-            base.OnConnected();
+            SendMessageToClient(eventArgs.Message);
         }
 
         public override Task OnConnected()
         {
             System.Console.WriteLine("OnConnected");
 
-            var playerId = new ObjectId(Context.QueryString["playerId"]);
-            var gameId = new ObjectId(Context.QueryString["gameId"]);
+            var playerId = ObjectId.Parse(Context.QueryString["playerId"]);
+            var gameId = ObjectId.Parse(Context.QueryString["gameId"]);
+            var connectionId = ObjectId.Parse(Context.QueryString["connectionId"]);
 
-            var decisionMaker = _decisionMakerManager.GetOrInsertDecisionMakers(gameId, playerId, ConnectionType.SignalR, Context.ConnectionId);
+            ConnectionIds[connectionId] = Context.ConnectionId;
 
-
+            var decisionMaker = _decisionMakerManager.GetOrInsert(gameId, playerId, connectionId, ConnectionType.SignalR);
+            
             return base.OnConnected();
         }
 
-        public void SendMessageFromServer(string message, string connectionId)
+        public override Task OnDisconnected(bool stopCalled)
         {
-            Clients.Client(connectionId).SendMessage(message);
+            var connectionId = ObjectId.Parse(Context.QueryString["connectionId"]);
+
+            ConnectionIds.Remove(connectionId);
+
+            return base.OnDisconnected(stopCalled);
+        }
+
+        public override Task OnReconnected()
+        {
+            var playerId = ObjectId.Parse(Context.QueryString["playerId"]);
+            var gameId = ObjectId.Parse(Context.QueryString["gameId"]);
+            var connectionId = ObjectId.Parse(Context.QueryString["connectionId"]);
+
+            ConnectionIds[connectionId] = Context.ConnectionId;
+
+            var decisionMaker = _decisionMakerManager.GetOrInsert(gameId, playerId, connectionId, ConnectionType.SignalR);
+
+            return base.OnReconnected();            
+        }
+
+        public void SendMessageToClient(string message, ObjectId connectionId)
+        {
+            string signalRConnectionId;
+            if (ConnectionIds.TryGetValue(connectionId, out signalRConnectionId))
+            {
+                Clients.Client(signalRConnectionId).sendMessageFromServer(message);
+            }
+            else
+            {
+                // TODO handle this somehow?
+            }
+        }
+
+        public void SendMessageToClient(string message)
+        {
+            Clients.All.sendMessageFromServerAll(message);
         }
 
         public void send(ClientPlayerEventArgs eventArgs)
         {
-            var playerId = new ObjectId(Context.QueryString["playerId"]);
-            var gameId = new ObjectId(Context.QueryString["gameId"]);
+            var playerId = ObjectId.Parse(Context.QueryString["playerId"]);
+            var gameId = ObjectId.Parse(Context.QueryString["gameId"]);
 
             _decisionMakerManager.ProcessPlayerEvent(eventArgs, gameId, playerId);            
         }

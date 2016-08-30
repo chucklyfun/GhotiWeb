@@ -41,7 +41,7 @@ namespace GameLogic.Game
 
         public Domain.ServerToClientAction Action { get; set; }
 
-        public IList<Domain.PlayerCard> Cards { get; set; }
+        public List<Domain.PlayerCard> Cards { get; set; }
     }
 
     public delegate void GameViewEvent(object sender, GameViewEventArgs eventArgs);
@@ -58,7 +58,7 @@ namespace GameLogic.Game
         public ClientToServerAction Action { get; set; }
 
         [JsonConverter(typeof(ListObjectIdConverter))]
-        public IList<ObjectId> Cards { get; set; }
+        public List<ObjectId> Cards { get; set; }
     }
 
 

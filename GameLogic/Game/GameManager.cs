@@ -20,7 +20,7 @@ namespace GameLogic.Game
         void ProcessDraw(Domain.Game g);
         void ProcessEquip(Domain.Game g);
         void ProcessAmbush(Domain.Game g);
-        void ProcessKeep(Domain.Game g, Domain.Player player, IList<Domain.PlayerCard> cards);
+        void ProcessKeep(Domain.Game g, Domain.Player player, List<Domain.PlayerCard> cards);
         void ProcessAttack(Domain.Game g, IDictionary<Domain.Player, int> attackTotals);
         void ProcessAmbushAttackActions(Domain.Game g);
 
@@ -52,7 +52,9 @@ namespace GameLogic.Game
             IPlayerManager playerManager,
             IGameUtilities gameUtilities,
             IGameViewManager gameViewManager,
-            ISettingsManager settingsManager)
+            ISettingsManager settingsManager,
+            ICardUtilities<Domain.MonsterCard> monsterCardUtilities,
+            ICardUtilities<Domain.PlayerCard> playerCardUtilities)
         {
             _monsterCardManager = monsterCardManager;
             _playerCardManager = playerCardManager;
@@ -60,6 +62,8 @@ namespace GameLogic.Game
             _gameViewManager = gameViewManager;
             _gameUtilities = gameUtilities;
             _settingsManager = settingsManager;
+            _monsterCardUtilities = monsterCardUtilities;
+            _playerCardUtilities = playerCardUtilities;
         }
 
         public bool InitializeGame(Domain.Game game)
@@ -245,7 +249,7 @@ namespace GameLogic.Game
             }
         }
 
-        public void ProcessKeep(Domain.Game game, Domain.Player player, IList<Domain.PlayerCard> keepCards)
+        public void ProcessKeep(Domain.Game game, Domain.Player player, List<Domain.PlayerCard> keepCards)
         {
             foreach (var card in keepCards)
             {
@@ -438,7 +442,7 @@ namespace GameLogic.Game
                 }
             }
 
-            _gameViewManager.UpdatedGameView(new GameViewEventArgs()
+            _gameViewManager.OnUpdatedGameView(this, new GameViewEventArgs()
             {
                 Action = ServerToClientAction.PlayBlind,
                 Game = game

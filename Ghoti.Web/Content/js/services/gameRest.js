@@ -33,5 +33,9 @@ angular.module('routerApp').factory("$gameRest", ['$resource', '$http', '$q', fu
         return $http({ method: 'GET', url: 'api/Game/' + gameId + '/AddPlayer/' + userId });
     };
 
+    $gameRest.getPlayers = function (gameId) {
+        return $http({ method: 'GET', url: 'api/Game/' + gameId + '/Players' });
+    };
+
     return $gameRest;
 }]);

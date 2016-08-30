@@ -4,23 +4,26 @@ angular.module('routerApp')
     .factory('connection', ['$rootScope', 'Hub', function ($rootScope, Hub) {
         //Override socket.on to $apply the changes to angular
     return {
-        initialize: function(gameId, playerId)
+        initialize: function(gameId, playerId, connectionId)
         {
             var hub = new Hub('gamehub',
             {
-                methods: ['send', 'connected'],
+                methods: ['send'],
                 queryParams: {
                     'gameId': gameId,
-                    'playerId': playerId
+                    'playerId': playerId,
+                    'connectionId' : connectionId
                 },
                 listeners:
                 {
-                    sendSendMessageFromServer: function (id) 
+                    sendMessageFromServer: function (data) 
                     {
-                        var employee = find(id);
-                        employee.Locked = true;
+                        $rootScope.gv = data;
                         $rootScope.$apply();
                     },
+                    sendMessageFromServerAll: function (data) {
+                        console.log(data)
+                    }
                 },
                 logging : true,
                 useSharedConnection : false

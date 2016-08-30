@@ -8,6 +8,8 @@ using GameLogic.Data;
 using Utilities;
 using System.IO;
 using System.Web;
+using GameLogic.Domain;
+using System.Web.Hosting;
 
 namespace GameLogic.Game
 {
@@ -21,9 +23,9 @@ namespace GameLogic.Game
 
         string GetMonsterCardFileName(GameLogic.Domain.Game game);
 
-        Deck.Deck<Domain.PlayerCard> LoadPlayerCardDeck(string fileName);
+        Deck<Domain.PlayerCard> LoadPlayerCardDeck(string fileName);
 
-        Deck.Deck<Domain.MonsterCard> LoadMonsterCardDeck(string fileName);
+        Deck<Domain.MonsterCard> LoadMonsterCardDeck(string fileName);
     }
 
     public class GameUtilities : IGameUtilities
@@ -48,23 +50,23 @@ namespace GameLogic.Game
             return game.DrawActions.Max(f => _playerManager.CalculatePlayerKeep(f.Key) + f.Value.ActionKeepBonus);
         }
 
-        public Deck.Deck<Domain.PlayerCard> LoadPlayerCardDeck(string fileName)
+        public Deck<Domain.PlayerCard> LoadPlayerCardDeck(string fileName)
         {
-            var result = new Deck.Deck<Domain.PlayerCard>();
+            var result = new Domain.Deck<Domain.PlayerCard>();
 
             var configuration = _settingsManager.GetConfiguration();
-            var path = HttpContext.Current.Server.MapPath(Path.Combine(configuration.DataPath, fileName));
+            var path = HostingEnvironment.MapPath(Path.Combine(configuration.DataPath, fileName));
             result.DrawPile = new Stack<Domain.PlayerCard>(_cardLoader.LoadPlayerCardFile(path));
 
             return result;
         }
 
-        public Deck.Deck<Domain.MonsterCard> LoadMonsterCardDeck(string fileName)
+        public Deck<Domain.MonsterCard> LoadMonsterCardDeck(string fileName)
         {
-            var result = new Deck.Deck<Domain.MonsterCard>();
+            var result = new Domain.Deck<Domain.MonsterCard>();
 
             var configuration = _settingsManager.GetConfiguration();
-            var path = HttpContext.Current.Server.MapPath(Path.Combine(configuration.DataPath, fileName));
+            var path = HostingEnvironment.MapPath(Path.Combine(configuration.DataPath, fileName));
             result.DrawPile = new Stack<Domain.MonsterCard>(_cardLoader.LoadMonsterCardFile(path));
 
             return result;

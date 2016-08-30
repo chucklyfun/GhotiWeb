@@ -12,8 +12,8 @@ namespace GameLogic.Deck
 
     public interface ICardManager<T>
     {
-        T DrawCard(Domain.Game game, Deck<T> deck);
-        void AddToDiscard(Deck<T> deck, T card);
+        T DrawCard(Domain.Game game, Domain.Deck<T> deck);
+        void AddToDiscard(Domain.Deck<T> deck, T card);
 
         T GetCard(GameLogic.Domain.Game game, ObjectId cardId, Func<IEnumerable<T>> getter);
     }
@@ -24,14 +24,18 @@ namespace GameLogic.Deck
 
         private ICardLoader _cardLoader;
 
-        public CardManager(ICardUtilities<T> cardUtilities)
+        private ICardUtilities<T> _cardUtilities;
+
+        public CardManager(ICardUtilities<T> cardUtilities, ICardLoader cardLoader, IRuntimeCache runtimeCache)
         {
             _cardUtilities = cardUtilities;
+            _cardLoader = cardLoader;
+            _cache = runtimeCache;
         }
 
-        private ICardUtilities<T> _cardUtilities { get; set; }
+        
 
-        public T DrawCard(Domain.Game game, Deck<T> deck)
+        public T DrawCard(Domain.Game game, Domain.Deck<T> deck)
         {
             T card = default(T);
             if (!deck.DrawPile.Any())
@@ -48,7 +52,7 @@ namespace GameLogic.Deck
             return card;
         }
 
-        public void AddToDiscard(Deck<T> deck, T card)
+        public void AddToDiscard(Domain.Deck<T> deck, T card)
         {
             deck.DiscardPile.Add(card);
         }
