@@ -18,14 +18,14 @@ namespace GameLogic.Game
     {
         int CalculateDrawMax(Domain.Game game);
         int CalculateKeepMax(Domain.Game game);
-        
-        string GetPlayerCardFileName(GameLogic.Domain.Game game);
 
-        string GetMonsterCardFileName(GameLogic.Domain.Game game);
+        string GetPlayerCardFileName(string fileName);
 
-        Deck<Domain.PlayerCard> LoadPlayerCardDeck(string fileName);
+        string GetMonsterCardFileName(string fileName);
 
-        Deck<Domain.MonsterCard> LoadMonsterCardDeck(string fileName);
+        IEnumerable<Domain.PlayerCard> LoadPlayerCardDeck(string fileName);
+
+        IEnumerable<Domain.MonsterCard> LoadMonsterCardDeck(string fileName);
     }
 
     public class GameUtilities : IGameUtilities
@@ -50,36 +50,30 @@ namespace GameLogic.Game
             return game.DrawActions.Max(f => _playerManager.CalculatePlayerKeep(f.Key) + f.Value.ActionKeepBonus);
         }
 
-        public Deck<Domain.PlayerCard> LoadPlayerCardDeck(string fileName)
+        public IEnumerable<Domain.PlayerCard> LoadPlayerCardDeck(string fileName)
         {
-            var result = new Domain.Deck<Domain.PlayerCard>();
+            var configuration = _settingsManager.GetConfiguration();
+            var path = HostingEnvironment.MapPath(Path.Combine(configuration.DataPath, fileName));
+            return _cardLoader.LoadPlayerCardFile(path);
+        }
+
+        public IEnumerable<Domain.MonsterCard> LoadMonsterCardDeck(string fileName)
+        {
+            var result = new Domain.Deck();
 
             var configuration = _settingsManager.GetConfiguration();
             var path = HostingEnvironment.MapPath(Path.Combine(configuration.DataPath, fileName));
-            result.DrawPile = new Stack<Domain.PlayerCard>(_cardLoader.LoadPlayerCardFile(path));
-
-            return result;
+            return _cardLoader.LoadMonsterCardFile(path);
         }
 
-        public Deck<Domain.MonsterCard> LoadMonsterCardDeck(string fileName)
+        public string GetPlayerCardFileName(string gameVersion)
         {
-            var result = new Domain.Deck<Domain.MonsterCard>();
-
-            var configuration = _settingsManager.GetConfiguration();
-            var path = HostingEnvironment.MapPath(Path.Combine(configuration.DataPath, fileName));
-            result.DrawPile = new Stack<Domain.MonsterCard>(_cardLoader.LoadMonsterCardFile(path));
-
-            return result;
+            return "PlayerCards_" + gameVersion + ".csv";
         }
 
-        public string GetPlayerCardFileName(GameLogic.Domain.Game game)
+        public string GetMonsterCardFileName(string gameVersion)
         {
-            return "PlayerCards_" + game.Version + ".csv";
-        }
-
-        public string GetMonsterCardFileName(GameLogic.Domain.Game game)
-        {
-            return "MonsterCards_" + game.Version + ".csv";
+            return "MonsterCards_" + gameVersion + ".csv";
         }
     }
 }

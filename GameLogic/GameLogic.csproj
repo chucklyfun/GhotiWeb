@@ -122,12 +122,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Data\CardLoader.cs" />
+    <Compile Include="Deck\CardService.cs" />
     <Compile Include="Deck\CardManager.cs" />
     <Compile Include="Deck\CardUtilities.cs" />
+    <Compile Include="Domain\CardSetManager.cs" />
     <Compile Include="Domain\Deck.cs" />
     <Compile Include="Domain\ActionType.cs" />
     <Compile Include="Domain\ConnectionType.cs" />
     <Compile Include="Domain\EquipmentType.cs" />
+    <Compile Include="Domain\CardInstance.cs" />
     <Compile Include="Domain\MonsterCard.cs" />
     <Compile Include="Domain\PlayerCard.cs" />
     <Compile Include="Deck\PlayStrategy.cs" />

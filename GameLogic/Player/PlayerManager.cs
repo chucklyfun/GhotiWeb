@@ -10,11 +10,11 @@ namespace GameLogic.Player
         Domain.Player NextPlayer(Domain.Game game);
         void NextRound(Domain.Game game);
 
-        bool ValidateEquipment(Domain.Player player, Domain.PlayerCard card);
+        bool ValidateEquipment(Domain.Player player, Domain.CardInstance card);
 
-        bool KeepDrawCards(Domain.Player player, List<Domain.PlayerCard> cards);
+        bool KeepDrawCards(Domain.Player player, List<Domain.CardInstance> cards);
 
-        List<Domain.PlayerCard> DiscardCard(Domain.Player player, Domain.PlayerCard card);
+        List<Domain.CardInstance> DiscardCard(Domain.Player player, Domain.CardInstance card);
 
         int CalculatePlayerAttack(Domain.Player player);
 
@@ -29,8 +29,11 @@ namespace GameLogic.Player
 
     public class PlayerManager : IPlayerManager
     {
-        public PlayerManager()
+        private ICardService _cardService;
+        
+        public PlayerManager(ICardService cardService)
         {
+            _cardService = cardService;
         }
 
         public Domain.Player NextPlayer(Domain.Game game)
@@ -48,13 +51,16 @@ namespace GameLogic.Player
             NextPlayer(game);
         }
 
-        public bool ValidateEquipment(Domain.Player player, Domain.PlayerCard card)
+        public bool ValidateEquipment(Domain.Player player, Domain.CardInstance card, string gameVersion)
         {
             bool result = false;
             List<Domain.PlayerCard> compareableEquipment = null;
-            if (card.EquipmentType == Domain.EquipmentType.TwoHand || card.EquipmentType == Domain.EquipmentType.Hand)
+
+            var equipmentCards = player.Equipment.Select(f => _cardService.GetPlayerCard(gameVersion, f.CardId)).Where(h => h != null);
+            
+            if (cardData.EquipmentType == Domain.EquipmentType.TwoHand || cardData.EquipmentType == Domain.EquipmentType.Hand)
             {
-                var singleHand = player.Equipment.Where(f => f.EquipmentType == Domain.EquipmentType.Hand || f.EquipmentType == Domain.EquipmentType.TwoHand);
+                var singleHand = equipmentCards.Count(f => f.EquipmentType == Domain.EquipmentType.Hand || f.EquipmentType == Domain.EquipmentType.TwoHand);
 
                 var twoHand = player.Equipment.Where(f => f.EquipmentType == Domain.EquipmentType.TwoHand);
 
@@ -72,7 +78,7 @@ namespace GameLogic.Player
             return result;
         }
 
-        public bool KeepDrawCards(Domain.Player player, List<Domain.PlayerCard> cards)
+        public bool KeepDrawCards(Domain.Player player, List<Domain.CardInstance> cards)
         {
             var keepCards = cards.Intersect(player.DrawCards);
             var result = !(player.DrawCards.Count > keepCards.Count());
@@ -83,9 +89,9 @@ namespace GameLogic.Player
             return result;
         }
 
-        public List<Domain.PlayerCard> DiscardCard(Domain.Player player, Domain.PlayerCard card)
+        public List<Domain.CardInstance> DiscardCard(Domain.Player player, Domain.CardInstance card)
         {
-            List<Domain.PlayerCard> result = new List<Domain.PlayerCard>();
+            var result = new List<Domain.CardInstance>();
 
             player.Equipment.Remove(card);
             result.Add(card);
@@ -97,6 +103,7 @@ namespace GameLogic.Player
         public int CalculatePlayerAttack(Domain.Player player)
         {
             int result = 0;
+
             foreach (var card in player.Equipment)
             {
                 result += card.EquipmentPowerBonus;
@@ -107,6 +114,8 @@ namespace GameLogic.Player
         public int CalculatePlayerSpeed(Domain.Player player)
         {
             int result = 0;
+
+            var cards = 
             foreach (var card in player.Equipment)
             {
                 result += card.EquipmentSpeedBonus;

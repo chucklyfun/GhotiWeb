@@ -27,7 +27,7 @@ namespace ghoti.web.Controllers
             _userRepository = userRepository;
             _gameRepository = gameRepository;
             _serializationService = serializationService;
-
+            
             Get["/api/Game/Get"] = _ => serializationService.Serialize(_gameRepository.AsQueryable());
 
             Get["/api/Game/Get/0"] = _ =>

@@ -5,20 +5,21 @@ using System.Text;
 using System.Threading.Tasks;
 
 using System.Security.Cryptography;
+using GameLogic.Domain;
 
 namespace GameLogic.Deck
 {
-    public interface ICardUtilities<T>
+    public interface ICardUtilities
     {
-        void Shuffle(Domain.Deck<T> deck);
-        void RefillDrawPile(Domain.Deck<T> deck);
+        void Shuffle(Domain.Deck deck);
+        void RefillDrawPile(Domain.Deck deck);
     }
 
     
 
-    public class CardUtilities<T> : ICardUtilities<T>
+    public class CardUtilities : ICardUtilities
     {
-        public void RefillDrawPile(Domain.Deck<T> deck)
+        public void RefillDrawPile(Domain.Deck deck)
         {
             foreach (var card in deck.DiscardPile)
             {
@@ -28,7 +29,7 @@ namespace GameLogic.Deck
             deck.DiscardPile.Clear();
         }
 
-        public void Shuffle(Domain.Deck<T> deck)
+        public void Shuffle(Domain.Deck deck)
         {
             RNGCryptoServiceProvider provider = new RNGCryptoServiceProvider();
             
@@ -43,12 +44,12 @@ namespace GameLogic.Deck
                 while (!(box[0] < n * (byte.MaxValue / n)));
                 int k = (box[0] % n);
                 n--;
-                T value = arr[k];
+                var value = arr[k];
                 arr[k] = arr[n];
                 arr[n] = value;
 
             }
-            deck.DrawPile = new Stack<T>(arr);
+            deck.DrawPile = new Stack<CardInstance>(arr);
         }
     }
 }

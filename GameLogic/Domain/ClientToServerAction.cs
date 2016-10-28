@@ -7,6 +7,7 @@ namespace GameLogic.Domain
         DrawAndDiscard = 2,
         PlayAction = 3,
         PlayEquipment = 4,
-        StartGame = 5
+        StartGame = 5,
+        Refresh = 6
     }
 }

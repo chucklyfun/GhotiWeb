@@ -36,12 +36,11 @@ namespace GameLogic
             kernel.Bind<IGameStateManager>().To<GameStateManager>();
             kernel.Bind<IPlayerManager>().To<PlayerManager>().InSingletonScope();
             kernel.Bind<IGameStateManager>().To<GameStateManager>().InSingletonScope();
-            kernel.Bind<ICardManager<MonsterCard>>().To<CardManager<MonsterCard>>().InSingletonScope();
-            kernel.Bind<ICardManager<PlayerCard>>().To<CardManager<PlayerCard>>().InSingletonScope();
-            kernel.Bind<ICardUtilities<PlayerCard>>().To<CardUtilities<PlayerCard>>().InSingletonScope();
-            kernel.Bind<ICardUtilities<MonsterCard>>().To<CardUtilities<MonsterCard>>().InSingletonScope();
+            kernel.Bind<ICardManager>().To<CardManager>().InSingletonScope();
+            kernel.Bind<ICardUtilities>().To<CardUtilities>().InSingletonScope();
             kernel.Bind<IGameUtilities>().To<GameUtilities>().InSingletonScope();
             kernel.Bind<ICardLoader>().To<CardLoader>().InSingletonScope();
+            kernel.Bind<ICardService>().To<CardService>().InSingletonScope();
 
             kernel.Bind<ISignalRDecisionConnection>().To<SignalRDecisionConnection>();
             kernel.Bind<ISignalRDecisionConnectionFactory>().ToFactory();

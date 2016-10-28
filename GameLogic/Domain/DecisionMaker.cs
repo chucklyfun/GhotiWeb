@@ -16,6 +16,9 @@ namespace GameLogic.Domain
 
         public ConnectionType ConnectionType { get; set; }
 
+        public DateTime LastUpdated { get; set; }
+        public TimeSpan TimeoutPeriod { get; set; }
+
         public string AuthenticationToken { get; set; }
     }
 }

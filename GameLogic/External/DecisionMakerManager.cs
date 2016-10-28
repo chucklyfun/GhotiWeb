@@ -8,6 +8,8 @@ using Utilities.Data;
 using MongoDB.Bson;
 using GameLogic.Deck;
 using GameLogic.Data;
+using Utilities;
+using Utilities.EventBroker;
 
 namespace GameLogic.External
 {
@@ -18,26 +20,24 @@ namespace GameLogic.External
     public delegate void MessageEventHandler(object sender, MessageEventArgs eventArgs);
 
     public interface IDecisionMakerManager
-    {	
+    {
         event UpdatedViewEvent UpdatedPlayerViewEvent;
 
         event MessageEventHandler MessageEvent;
 
         void MessageEventSafe(object sender, MessageEventArgs eventArgs);
-        
+
         List<DecisionMaker> GetDecisionMakers(ObjectId gameId, ObjectId playerId);
 
         DecisionMaker Get(ConnectionType connectionType, ObjectId connectionId);
 
-        DecisionMaker GetOrInsert(ObjectId gameId, ObjectId playerId, ObjectId persistentConnectionId, ConnectionType connectionType);
+        DecisionMaker GetOrInsert(ObjectId gameId, ObjectId playerId, ObjectId persistentConnectionId, ConnectionType connectionType, TimeSpan timeoutPeriod);
 
         bool Update(DecisionMaker decisionMaker);
 
         void Remove(DecisionMaker decisionMaker);
 
         bool ClearAllConnections();
-
-        void ProcessPlayerEvent(ClientPlayerEventArgs playerEvent, ObjectId gameId, ObjectId playerId);
     }
 
     public class MessageEventArgs : EventArgs
@@ -51,37 +51,46 @@ namespace GameLogic.External
 
         public ObjectId GameId { get; set; }
 
+        public List<DecisionMaker> DecisionMakers { get; set; }
+
         public IView View { get; set; }
     }
 
-    public class DecisionMakerManager : IDecisionMakerManager
+    public class DecisionMakerManager : IDecisionMakerManager, ISubscriber<ClientPlayerEventArgsExt>
     {
-	    private IPlayerManager _playerManager;
+        private IPlayerManager _playerManager;
         private IRepository<DecisionMaker> _decisionMakerRepository;
         private IRepository<GameLogic.Domain.Game> _gameRepository;
         private IRepository<GameLogic.Domain.Player> _playerRepository;
         private IGameManager _gameManager;
         private IGameViewManager _gameViewManager;
-        private ICardManager<PlayerCard> _playerCardManager;
-        private ICardManager<MonsterCard> _monsterCardManager;
+        private ICardManager _cardManager;
         private ICardLoader _cardLoader;
+        private ICardService _cardService;
         private IGameUtilities _gameUtilities;
+        private ISignalRConnectionManager _signalRConnectionManager;
+        private IEventPublisher _eventPublisher;
+        private ISubscriptionService _subscriptionService;
 
-	    public DecisionMakerManager (IPlayerManager playerManager, IRepository<DecisionMaker> decisionMakerRepository, IRepository<GameLogic.Domain.Game> gameRepository, IGameManager gameManager, ICardManager<PlayerCard> playerCardManager, ICardManager<MonsterCard> monsterCardManager, IGameViewManager gameViewManager, ICardLoader cardLoader, IGameUtilities gameUtilities)
-	    {
-		    _playerManager = playerManager;
+        public DecisionMakerManager(IPlayerManager playerManager, IRepository<DecisionMaker> decisionMakerRepository, IRepository<GameLogic.Domain.Game> gameRepository, IGameManager gameManager, ICardManager cardManager, IGameViewManager gameViewManager, ICardLoader cardLoader, IGameUtilities gameUtilities, IEventPublisher eventPublisher, ISignalRConnectionManager signalRConnectionManager, ISubscriptionService subscriptionService, ICardService cardService)
+        {
+            _playerManager = playerManager;
             _gameViewManager = gameViewManager;
             _gameRepository = gameRepository;
             _gameManager = gameManager;
-            _gameViewManager = gameViewManager;
             _decisionMakerRepository = decisionMakerRepository;
             _gameUtilities = gameUtilities;
+            _signalRConnectionManager = signalRConnectionManager;
+            _eventPublisher = eventPublisher;
 
-            _playerCardManager = playerCardManager;
-            _monsterCardManager = monsterCardManager;
+            _cardManager = cardManager;
+            _subscriptionService = subscriptionService;
+            _cardService = cardService;
 
             _gameViewManager.UpdatedGameView += _gameViewManager_UpdatedView;
-	    }
+
+            _subscriptionService.RegisterSubscriber(this);
+        }
 
         public event UpdatedViewEvent UpdatedPlayerViewEvent;
 
@@ -89,18 +98,37 @@ namespace GameLogic.External
 
         public void _gameViewManager_UpdatedView(object sender, GameViewEventArgs eventArgs)
         {
-            if (UpdatedPlayerViewEvent != null)
+            foreach (var player in eventArgs.Game.Players)
             {
-                foreach (var player in eventArgs.Game.Players)
+                var decisionMakers = GetDecisionMakers(eventArgs.Game.Id, player.Id);
+
+                if (decisionMakers != null && decisionMakers.Any())
                 {
-                    UpdatedPlayerViewEvent(this, new ClientViewEventArgs()
+                    foreach (var dm in decisionMakers)
                     {
-                        GameId = eventArgs.Game.Id,
-                        PlayerId = player.Id,
-                        View = CreateGameView(eventArgs.Game, player)
-                    });
+                        if (dm.LastUpdated + dm.TimeoutPeriod > DateTime.UtcNow)
+                        {
+                            _decisionMakerRepository.Delete(dm);
+                        }
+                        else
+                        {
+                            _eventPublisher.Publish(new ClientViewEventArgs()
+                            {
+                                GameId = eventArgs.Game.Id,
+                                PlayerId = player.Id,
+                                DecisionMakers = decisionMakers,
+                                View = _gameViewManager.CreateGameView(eventArgs.Game, player)
+                            });
+                        }
+                    }
                 }
             }
+
+        }
+
+        public void HandleEvent(ClientPlayerEventArgsExt eventArgs)
+        {
+            ProcessPlayerEvent(eventArgs);
         }
 
         public void MessageEventSafe(object sender, MessageEventArgs eventArgs)
@@ -122,7 +150,7 @@ namespace GameLogic.External
             return _decisionMakerRepository.AsQueryable().Where(f => f.ConnectionType == connectionType && f.ConnectionId.Equals(connectionId)).FirstOrDefault();
         }
 
-        public DecisionMaker GetOrInsert(ObjectId gameId, ObjectId playerId, ObjectId persistentConnectionId, ConnectionType connectionType)
+        public DecisionMaker GetOrInsert(ObjectId gameId, ObjectId playerId, ObjectId persistentConnectionId, ConnectionType connectionType, TimeSpan timeoutPeriod)
         {
             var result = Get(connectionType, persistentConnectionId);
 
@@ -133,7 +161,9 @@ namespace GameLogic.External
                     GameId = gameId,
                     PlayerId = playerId,
                     ConnectionId = persistentConnectionId,
-                    ConnectionType = connectionType
+                    ConnectionType = connectionType,
+                    TimeoutPeriod = timeoutPeriod,
+                    LastUpdated = DateTime.UtcNow
                 };
 
                 _decisionMakerRepository.Insert(result);
@@ -159,55 +189,6 @@ namespace GameLogic.External
             return true;
         }
 
-        public GameView CreateGameView(Domain.Game game, Domain.Player p)
-        {
-            var result = new GameView();
-            result.GameId = game.Id;
-
-            result.PlayerCardIds.AddRange(p.Hand.Select(f => f.Id));
-            result.MonsterCardIds.AddRange(game.MonsterQueue.Select(f => f.Id));
-
-            result.CurrentPlayer = CreatePlayerView(p);
-            foreach (Domain.Player op in game.Players.Where(f => f.User.Id != p.User.Id))
-            {
-                result.OtherPlayers.Add(CreatePlayerView(op));
-            }
-            result.CurrentPlayer = CreatePlayerView(p);
-            return result;
-        }
-
-        public PlayerView CreatePlayerView(Domain.Player p)
-        {
-            var pv = new PlayerView();
-            pv.PlayerId = p.Id;
-
-            pv.HandSize = p.Hand.Count();
-            pv.PlayerAttack = _playerManager.CalculatePlayerAttack(p);
-            pv.PlayerHold = _playerManager.CalculatePlayerHold(p);
-            pv.PlayerDraw = _playerManager.CalculatePlayerDraw(p);
-            pv.PlayerKeep = _playerManager.CalculatePlayerKeep(p);
-            pv.PlayerSpeed = _playerManager.CalculatePlayerSpeed(p);
-
-            pv.ArmorCardIds.AddRange(p.Equipment.Where(f => f.EquipmentType == EquipmentType.Armor).Select(f => f.Id));
-            pv.BootsCardIds.AddRange(p.Equipment.Where(f => f.EquipmentType == EquipmentType.Boots).Select(f => f.Id));
-            pv.HelmetCardIds.AddRange(p.Equipment.Where(f => f.EquipmentType == EquipmentType.Helmet).Select(f => f.Id));
-            pv.HandCardIds.AddRange(p.Equipment.Where(f => f.EquipmentType == EquipmentType.Hand || f.EquipmentType == EquipmentType.TwoHand).Select(f => f.Id));
-            pv.OtherEquipmentCardIds.AddRange(p.Equipment.Where(f => f.EquipmentType == EquipmentType.Other).Select(f => f.Id));
-            
-            return pv;
-        }
-
-        public GameView CreateEquipmentView(Domain.Game game, Domain.Player currentPlayer, Domain.Player targetPlayer)
-        {
-            var gv = CreateGameView(game, currentPlayer);
-            foreach (var card in targetPlayer.Equipment)
-            {
-                gv.ChooseCardIds.Add(card.Id);
-            }
-
-            return gv;
-        }
-
         public bool ReadyPlayer(Domain.Game game, Domain.Player player)
         {
             var update = false;
@@ -220,7 +201,8 @@ namespace GameLogic.External
             }
 
             if (game.Players.Count >= 2 && game.Players.All(
-                f => {
+                f =>
+                {
                     var ready = false;
                     game.PlayerReady.TryGetValue(f, out ready);
                     return ready;
@@ -229,25 +211,33 @@ namespace GameLogic.External
                 _gameManager.StartGame(game);
                 update = true;
             }
-
+            else
+            {
+                _eventPublisher.Publish(new ClientPlayerEventArgs()
+                {
+                    Action = ClientToServerAction.Refresh
+                });
+            }
             return update;
         }
 
-        public void ProcessPlayerEvent(ClientPlayerEventArgs eventArgs, ObjectId gameId, ObjectId playerId)
+        public void ProcessPlayerEvent(ClientPlayerEventArgsExt eventArgs)
         {
-            var game = _gameRepository.GetById(gameId);
-            var player = game.Players.FirstOrDefault(f => f.Id.Equals(playerId));
-            
+            var game = _gameRepository.GetById(eventArgs.GameId);
+            var player = game.Players.FirstOrDefault(f => f.Id.Equals(eventArgs.PlayerId));
+
+            GetOrInsert(eventArgs.GameId, eventArgs.PlayerId, eventArgs.PermanentConnectionId, eventArgs.ConnectionType, eventArgs.TimeoutPeriod);
+
             if (game != null && player != null)
             {
-                if (eventArgs.Action == ClientToServerAction.StartGame)
+                if (eventArgs.Action == ClientToServerAction.StartGame && game.CurrentState == GameState.Pregame)
                 {
                     if (ReadyPlayer(game, player))
                     {
                         _gameRepository.Update(game);
                     }
                 }
-                else if (eventArgs.Action == ClientToServerAction.PlayEquipment 
+                else if (eventArgs.Action == ClientToServerAction.PlayEquipment
                     || eventArgs.Action == ClientToServerAction.PlayAction)
                 {
                     if (PlayCard(eventArgs, game, player))
@@ -255,23 +245,28 @@ namespace GameLogic.External
                         _gameRepository.Update(game);
                     }
                 }
+                else if (eventArgs.Action == ClientToServerAction.Refresh)
+                {
+                    _eventPublisher.Publish(new ClientViewEventArgs()
+                    {
+                        PlayerId = eventArgs.PlayerId,
+                        GameId = eventArgs.GameId,
+                        DecisionMakers = GetDecisionMakers(eventArgs.GameId, eventArgs.PlayerId),
+                        View = _gameViewManager.CreateGameView(game, player)
+                    });
+                }
             }
         }
 
         public bool PlayCard(ClientPlayerEventArgs eventArgs, Domain.Game game, Domain.Player player)
         {
-            var update = false;
+            var card = eventArgs.Cards.FirstOrDefault();
 
-            var card = _playerCardManager.GetCard(game, eventArgs.Cards.FirstOrDefault(),
-                () => _cardLoader.LoadPlayerCardFile(_gameUtilities.GetPlayerCardFileName(game)));
+            if (card == null) return false;
 
-            if (card != null)
-            {
-                _gameManager.PlayCardBlind(game, player, card, eventArgs.Action == ClientToServerAction.PlayAction);
-                update = true;    
-            }
-
-            return update;
-        }    
+            _gameManager.PlayCardBlind(game, player, card, eventArgs.Action == ClientToServerAction.PlayAction);
+                
+            return true;
+        }
     }
 }

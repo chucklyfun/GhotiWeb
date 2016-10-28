@@ -101,6 +101,11 @@ namespace GameLogic.Data
                         card.ActionType = action;
                     }
 
+                    if (csvHelper.TryGetField<string>("ImageUrl", out stringValue))
+                    {
+                        card.ImageUrl = stringValue;
+                    }
+
                     result.Add(card);
                 }
             }

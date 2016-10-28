@@ -1,8 +1,8 @@
 /**
 * Create a gameview
 */
-angular.module('routerApp').controller('GameController', ['$rootScope', '$scope', '$http', '$stateParams', '$gameRest', '$userRest', 'connection',
-    function ($rootScope, $scope, $http, $stateParams, $gameRest, $userRest, connection) {
+angular.module('routerApp').controller('GameController', ['$rootScope', '$scope', '$http', '$stateParams', '$gameRest', '$userRest', '$utilitiesRest', 'connection',
+    function ($rootScope, $scope, $http, $stateParams, $gameRest, $userRest, $utilitiesRest, connection) {
         $scope.Wait = 
             {
                 id : 'Wait',
@@ -28,21 +28,26 @@ angular.module('routerApp').controller('GameController', ['$rootScope', '$scope'
                 id: 'StartGame',
                 value: 5
             };
+        $scope.Refresh =
+            {
+                id: 'Refresh',
+                value: 6
+            };
 
-        $scope.createPlayerView = function(player, hubId)
+        $scope.createPlayerView = function(player)
         {
             return result =
             {
                 Name: player.User.FullName,
                 PlayerId: player.Id,
                 SelectedCards: [],
-                CurrentAction: $scope.Wait.value,
-                HubId : hubId
+                View: player
+                
             };
         }
 
-        $scope.hubs = {};
-        $scope.PlayersMap = {};
+        $scope.Hubs = {};
+        $rootScope.PlayersMap = {};
         $scope.Players = [];
         $scope.ServerViews = {};
 
@@ -79,8 +84,12 @@ angular.module('routerApp').controller('GameController', ['$rootScope', '$scope'
                         cellTemplate: '<div><button id="btnWait" type="button" class="btn btn-primary" ng-click="grid.appScope.Action(row.entity.PlayerId, grid.appScope.Wait)" >Wait</button></div>'
                     },
                     {
+                        name: 'Refresh',
+                        cellTemplate: '<div><button id="btnRefresh" type="button" class="btn btn-primary" ng-click="grid.appScope.Action(row.entity.PlayerId, grid.appScope.Refresh)" >Refresh</button></div>'
+                    },
+                    {
                         name: 'Hand',
-                        cellTemplate: '<li data-ng-repeat="c in row.entity.Hand"><span>{{c.Name}}</span><span>{{c.CardNumber}}</span><img ng-src="{{c.ImageUrl}}" ng-click="grid.appScope.toggleCard(row.entity.PlayerId, c.Id)"/></li>'
+                        cellTemplate: '<li data-ng-repeat="c in row.entity.View.PlayerCardIds"><img ng-src="{{grid.appScope.GetCardUrl(c)}}" ng-click="grid.appScope.toggleCard(row.entity.PlayerId, c)"/></li>'
                     }
             ];
             
@@ -90,41 +99,54 @@ angular.module('routerApp').controller('GameController', ['$rootScope', '$scope'
             return $http({ method: 'GET', url: 'api/Utilities/CreateObjectId' });
         }
 
-        $scope.AddHub = function (gameId, player, connectionId) {
-            var h = connection.initialize(gameId, player.Id, connectionId);
+        $scope.AddHub = function (gameId, playerView) {
+            
+            $rootScope.getNewConnectionId()
+                .success(function (newId) 
+                {
+                    var h = connection.initialize(gameId, playerView.PlayerId, newId);
 
-            h.connection.start().done(function () {
-                console.log('Now connected, connection ID=' + h.connection.id);
+                    h.connection.start().done(function () {
+                        console.log('Now connected, connection ID=' + h.connection.id);
 
-                $scope.hubs[player.Id] = h;
-                $scope.PlayersMap[player.Id] = $scope.createPlayerView(player, h.connection.id);
-                $scope.$apply();
-            }).fail(function () {
-                console.log('Could not Connect!');
-            });
+                        $scope.Hubs[playerView.PlayerId] = h;
+                    }).fail(function () {
+                        console.log('Could not Connect!');
+                    });
+                })
         };
 
         $scope.init = function ()
         {
             $scope.gameId = $stateParams.Id;
 
-            $gameRest.getPlayers($scope.gameId)
-                .success(function (data) {
-                    $scope.Players = data;
+            $utilitiesRest.GetCards($scope.gameId)
+                .success(function (data)
+                {
+                    $scope.CardImages = data;
 
-                    for (var p in $scope.Players)
-                    {
-                        var player = data[p];
-                        $scope.PlayersMap[player.Id] = player;
+                    $gameRest.getPlayers($scope.gameId)
+                        .success(function (data)
+                        {
+                            for (var p in data) {
+                                var player = data[p];
+                                var playerView = $scope.createPlayerView(player);
+                                $scope.PlayersMap[player.Id] = playerView;
+                                $scope.Players.push(playerView);
 
-                        $rootScope.getNewConnectionId()
-                            .success(function (newId) {
-                                $scope.AddHub($scope.gameId, player, newId);
-                            })
-                        
-                    }
+                                $scope.AddHub($scope.gameId, playerView);
+                            }
+
+                        });
                 });
+
+            
         };
+
+        $scope.GetCardUrl = function(id)
+        {
+            return $scope.CardImages[id];
+        }
 
         $scope.toggleCard = function(playerId, cardId)
         {
@@ -134,10 +156,10 @@ angular.module('routerApp').controller('GameController', ['$rootScope', '$scope'
                 var index = playerView.SelectedCards.indexOf(cardId);
 
                 if (index < 0) {
-                    $scope.SelectedCards[playerId].push(c);
+                    playerView.SelectedCards.push(cardId);
                 }
                 else {
-                    $scope.SelectedCards[playerId].splice(index, 1);
+                    playerView.SelectedCards.splice(index, 1);
                 }
             }
             else
@@ -155,10 +177,11 @@ angular.module('routerApp').controller('GameController', ['$rootScope', '$scope'
 
         $scope.Action = function (playerId, action) {
             var playerView = $scope.PlayersMap[playerId];
+            var hub = $scope.Hubs[playerId];
 
             var selectedCards = [];
 
-            if (playerView != undefined)
+            if (playerView != undefined && hub != undefined)
             {
                 selectedCards = playerView.SelectedCards;
 
@@ -168,19 +191,9 @@ angular.module('routerApp').controller('GameController', ['$rootScope', '$scope'
                         Cards: selectedCards
                     };
 
+                hub.send(playerEvent);
 
-                var hub = $scope.hubs[playerView.PlayerId];
-
-                if (hub != undefined)
-                {
-                    hub.send(playerEvent);
-
-                    playerView.SelectedCards = [];
-                }
-                else
-                {
-                    $scope.error = 'Unable to find hub: ' + playerView.HubId;
-                }
+                playerView.SelectedCards = [];
             }
         
         };

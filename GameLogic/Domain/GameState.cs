@@ -7,6 +7,8 @@ namespace GameLogic.Domain
         Reveal = 3,
         PlayEquip = 4,
         PlayAmbushAttack = 5,
-        PlayDraw = 6
+        PlayDraw = 6,
+        Pregame = 7,
+        Finished = 8
     }
 }

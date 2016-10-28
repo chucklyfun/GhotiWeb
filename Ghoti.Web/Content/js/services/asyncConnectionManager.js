@@ -16,13 +16,18 @@ angular.module('routerApp')
                 },
                 listeners:
                 {
-                    sendMessageFromServer: function (data) 
+                    sendMessageFromServer: function (playerServerView) 
                     {
-                        $rootScope.gv = data;
-                        $rootScope.$apply();
+                        var playerView = $rootScope.PlayersMap[playerServerView.CurrentPlayer.PlayerId];
+
+                        if (playerView != undefined)
+                        {
+                            playerView.View = playerServerView;
+                            $rootScope.$apply();
+                        }                        
                     },
                     sendMessageFromServerAll: function (data) {
-                        console.log(data)
+                        console.log(data + ', gameId: ' + gameId + ', playerId: ' + playerId + ', permanentConnectionId: ' + connectionId)
                     }
                 },
                 logging : true,

@@ -136,6 +136,12 @@
     <Compile Include="AsynchronousSocketListener.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="EventBroker\EventPublisher.cs" />
+    <Compile Include="EventBroker\ISubscriber.cs" />
+    <Compile Include="EventBroker\StorePageRequestedEvent.cs" />
+    <Compile Include="EventBroker\SubscriptionService.cs" />
+    <Compile Include="CollectionService.cs" />
+    <Compile Include="SignalRConnectionManager.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="Data\Cache\RuntimeCache.cs" />
     <Compile Include="Data\CsvReader.cs" />

@@ -7,12 +7,15 @@ using MongoDB.Bson;
 using Nancy.ModelBinding;
 using DataInitializer;
 using GameLogic.External;
+using GameLogic.Deck;
+using GameLogic.Domain;
+using Utilities.Data;
 
 namespace ghoti.web.Controllers
 {
     public class UtilitiesController : Nancy.NancyModule
     {
-        public UtilitiesController(ISettingsManager settingsManager, ISerializationService serializationService, IInitializer initializer, IDecisionMakerManager decisionMakerManager)
+        public UtilitiesController(ISettingsManager settingsManager, ISerializationService serializationService, IInitializer initializer, IDecisionMakerManager decisionMakerManager, ICardService cardService, IRepository<Game> gameRepository)
         {
             Get["/api/Utilities/Configuration/Get"] = _ =>
             {
@@ -51,6 +54,25 @@ namespace ghoti.web.Controllers
             Get["/api/Utilities/Configuration/CreateIds/{count}"] = _ =>
             {
                 return serializationService.Serialize(initializer.GenerateObjectIds(_.count));
+            };
+
+            Get["/api/Utilities/Configuration/PlayerCardImages/{gameId}"] = _ =>
+            {
+                var result = new Dictionary<ObjectId, string>();
+
+                var gameId = _.gameId;
+
+                if (gameId == null) return result;
+
+                ObjectId gameIdObjectId = ObjectId.Parse(gameId);
+
+                var game = gameRepository.GetById(gameIdObjectId);
+
+                if (game == null || game.Id == null) return result;
+
+                result = cardService.GetPlayerCardsDict(game.Version);
+
+                return result;
             };
         }
     }

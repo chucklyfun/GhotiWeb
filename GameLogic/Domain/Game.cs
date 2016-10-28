@@ -15,17 +15,17 @@ namespace GameLogic.Domain
         public List<Domain.Player> Players { get; set; }
         public Domain.Player CurrentPlayer { get; set; }
 
-        public Queue<MonsterCard> MonsterQueue { get; set; }
+        public Queue<CardInstance> MonsterQueue { get; set; }
 
-        public Deck<MonsterCard> MonsterCardDeck { get; set; }
-        public Deck<PlayerCard> PlayerCardDeck { get; set; }
+        public Deck MonsterCardDeck { get; set; }
+        public Deck PlayerCardDeck { get; set; }
 
-        public IDictionary<Domain.Player, PlayerCard> BlindActions { get; set; }
+        public IDictionary<Domain.Player, CardInstance> BlindActions { get; set; }
 
-        public IDictionary<Domain.Player, PlayerCard> EquipActions { get; set; }
-        public IDictionary<Domain.Player, PlayerCard> AttackActions { get; set; }
-        public IDictionary<Domain.Player, PlayerCard> AmbushActions { get; set; }
-        public IDictionary<Domain.Player, PlayerCard> DrawActions { get; set; }
+        public IDictionary<Domain.Player, CardInstance> EquipActions { get; set; }
+        public IDictionary<Domain.Player, CardInstance> AttackActions { get; set; }
+        public IDictionary<Domain.Player, CardInstance> AmbushActions { get; set; }
+        public IDictionary<Domain.Player, CardInstance> DrawActions { get; set; }
         public IDictionary<Domain.Player, bool> PlayerReady { get; set; }
         public IDictionary<Domain.Player, bool> ActionSide { get; set; }
 
@@ -38,17 +38,18 @@ namespace GameLogic.Domain
 
         public Game()
         {
-            MonsterQueue = new Queue<Domain.MonsterCard>();
+            MonsterQueue = new Queue<Domain.CardInstance>();
             Players = new List<Domain.Player>();
-            MonsterCardDeck = new Deck<Domain.MonsterCard>();
-            PlayerCardDeck = new Deck<Domain.PlayerCard>();
-            BlindActions = new Dictionary<Domain.Player, PlayerCard>();
-            EquipActions = new Dictionary<Domain.Player, PlayerCard>();
-            AttackActions = new Dictionary<Domain.Player, PlayerCard>();
-            AmbushActions = new Dictionary<Domain.Player, PlayerCard>();
-            DrawActions = new Dictionary<Domain.Player, PlayerCard>();
+            MonsterCardDeck = new Deck();
+            PlayerCardDeck = new Deck();
+            BlindActions = new Dictionary<Domain.Player, CardInstance>();
+            EquipActions = new Dictionary<Domain.Player, CardInstance>();
+            AttackActions = new Dictionary<Domain.Player, CardInstance>();
+            AmbushActions = new Dictionary<Domain.Player, CardInstance>();
+            DrawActions = new Dictionary<Domain.Player, CardInstance>();
             PlayerReady = new Dictionary<Domain.Player, bool>();
             ActionSide = new Dictionary<Domain.Player, bool>();
+            CurrentState = GameState.Pregame;
         }
     }
 }

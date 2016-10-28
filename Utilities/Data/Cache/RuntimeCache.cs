@@ -23,6 +23,11 @@ namespace Utilities.Data.Cache
     {
         public MemoryCache Cache { get; set; }
 
+        public RuntimeCache()
+        {
+            Cache = MemoryCache.Default;
+        }
+
         public object Get(string key)
         {
             return Cache.Get(key);

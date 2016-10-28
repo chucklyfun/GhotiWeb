@@ -6,14 +6,15 @@ using Utilities.Data;
 
 namespace GameLogic.Domain
 {
-    public interface ICard : IEntity
+    public interface ICardData : IEntity
     {
         string Name { get; set; }
         int CardNumber { get; set; }
         string ImageUrl { get; set; }
+        int Quantity { get; set; }
     }
 
-    public class PlayerCard : EntityBase, ICard
+    public class PlayerCard : EntityBase, ICardData
     {
         public string Name { get; set; }
         public int CardNumber { get; set; }
@@ -21,6 +22,7 @@ namespace GameLogic.Domain
         public EquipmentType EquipmentType { get; set; }
         public ActionType ActionType { get; set; }
         public string ImageUrl { get; set; }
+        public int Quantity { get; set; }
 
         public PlayerCard()
         {

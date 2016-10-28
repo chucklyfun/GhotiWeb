@@ -96,6 +96,7 @@ angular.module('routerApp').controller('StartController', ['$scope', '$http', '$
                 }
 
                 $scope.loadGames();
+                $scope.$apply();
                 error = "Successfully deleted game: " & entity.Id;
             }
         }).error(function (data, status, headers, config) {

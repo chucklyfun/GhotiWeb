@@ -4,15 +4,15 @@ using System.Linq;
 
 namespace GameLogic.Domain
 {
-    public class Deck<T>
+    public class Deck
     {
-        public Stack<T> DrawPile { get; set; }
-        public List<T> DiscardPile { get; set; }
+        public Stack<CardInstance> DrawPile { get; set; }
+        public List<CardInstance> DiscardPile { get; set; }
 
         public Deck()
         {
-            DrawPile = new Stack<T>();
-            DiscardPile = new List<T>();
+            DrawPile = new Stack<CardInstance>();
+            DiscardPile = new List<CardInstance>();
         }
     }
 }

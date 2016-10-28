@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using System.Linq;
 using Utilities.Data.Cache;
 using GameLogic.Data;
+using GameLogic.Domain;
 
 using MongoDB.Bson;
 using System;
@@ -10,23 +11,23 @@ using System;
 namespace GameLogic.Deck
 {
 
-    public interface ICardManager<T>
+    public interface ICardManager
     {
-        T DrawCard(Domain.Game game, Domain.Deck<T> deck);
-        void AddToDiscard(Domain.Deck<T> deck, T card);
+        CardInstance DrawCard(Domain.Game game, Domain.Deck deck);
+        void AddToDiscard(Domain.Deck deck, CardInstance card);
 
-        T GetCard(GameLogic.Domain.Game game, ObjectId cardId, Func<IEnumerable<T>> getter);
+        IEnumerable<T> GetCardsFromCache<T>(string gameVersion, Func<IEnumerable<T>> getter);
     }
 
-    public class CardManager<T> : ICardManager<T> where T : Domain.ICard
+    public class CardManager : ICardManager
     {
         private IRuntimeCache _cache;
 
         private ICardLoader _cardLoader;
 
-        private ICardUtilities<T> _cardUtilities;
+        private ICardUtilities _cardUtilities;
 
-        public CardManager(ICardUtilities<T> cardUtilities, ICardLoader cardLoader, IRuntimeCache runtimeCache)
+        public CardManager(ICardUtilities cardUtilities, ICardLoader cardLoader, IRuntimeCache runtimeCache)
         {
             _cardUtilities = cardUtilities;
             _cardLoader = cardLoader;
@@ -35,9 +36,9 @@ namespace GameLogic.Deck
 
         
 
-        public T DrawCard(Domain.Game game, Domain.Deck<T> deck)
+        public CardInstance DrawCard(Domain.Game game, Domain.Deck deck)
         {
-            T card = default(T);
+            CardInstance card = null;
             if (!deck.DrawPile.Any())
             {
                 _cardUtilities.RefillDrawPile(deck);
@@ -52,16 +53,17 @@ namespace GameLogic.Deck
             return card;
         }
 
-        public void AddToDiscard(Domain.Deck<T> deck, T card)
+        public void AddToDiscard(Domain.Deck deck, CardInstance card)
         {
             deck.DiscardPile.Add(card);
         }
 
-        public T GetCard(GameLogic.Domain.Game game, ObjectId cardId, Func<IEnumerable<T>> getter)
-        {
-            var cardList = _cache.AddOrGetExisting(game.Version + ":PlayerCardDeck", () => getter()) as IEnumerable<T> ?? new List<T>();
 
-            return cardList.FirstOrDefault(f => f.Id.Equals(cardId));
+
+        public IEnumerable<T> GetCardsFromCache<T>(string gameVersion, Func<IEnumerable<T>> getter)
+        {
+            return _cache.AddOrGetExisting(gameVersion + ":PlayerCardDeck", () => getter()) as IEnumerable<T> ?? new List<T>();
         }
+
     }
 }

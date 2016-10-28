@@ -12,7 +12,7 @@ namespace GameLogic.Game
 {
     public interface IGameManager
     {
-        void PlayCardBlind(Domain.Game g, Domain.Player player, Domain.PlayerCard card, bool actionSide);
+        void PlayCardBlind(Domain.Game g, Domain.Player player, Domain.CardInstance card, bool actionSide);
         bool CanReveal(Domain.Game g);
         void ProcessReveal(Domain.Game g);
 
@@ -20,16 +20,16 @@ namespace GameLogic.Game
         void ProcessDraw(Domain.Game g);
         void ProcessEquip(Domain.Game g);
         void ProcessAmbush(Domain.Game g);
-        void ProcessKeep(Domain.Game g, Domain.Player player, List<Domain.PlayerCard> cards);
+        void ProcessKeep(Domain.Game g, Domain.Player player, List<Domain.CardInstance> cards);
         void ProcessAttack(Domain.Game g, IDictionary<Domain.Player, int> attackTotals);
         void ProcessAmbushAttackActions(Domain.Game g);
 
-        void AddCardToQueue(Domain.Game game, Domain.MonsterCard monsterCard);
+        void AddCardToQueue(Domain.Game game, Domain.CardInstance monsterCard);
 
-        
-        void PlayerPlaysEquipment(Domain.Game game, Domain.Player player, Domain.PlayerCard card);
 
-        void PlayerPlaysAction(Domain.Game game, Domain.Player player, Domain.PlayerCard card);
+        void PlayerPlaysEquipment(Domain.Game game, Domain.Player player, Domain.CardInstance card);
+
+        void PlayerPlaysAction(Domain.Game game, Domain.Player player, Domain.CardInstance card);
 
         void StartGame(Domain.Game game);
     }
@@ -37,27 +37,25 @@ namespace GameLogic.Game
 
     public class GameManager : IGameManager
     {
-        private ICardManager<Domain.MonsterCard> _monsterCardManager;
-        private ICardManager<Domain.PlayerCard> _playerCardManager;
+        private ICardManager _cardManager;
         private IPlayerManager _playerManager;
         private IGameUtilities _gameUtilities;
         private IGameViewManager _gameViewManager;
         private ISettingsManager _settingsManager;
-        private ICardUtilities<Domain.MonsterCard> _monsterCardUtilities;
-        private ICardUtilities<Domain.PlayerCard> _playerCardUtilities;
+        private ICardUtilities _monsterCardUtilities;
+        private ICardUtilities _playerCardUtilities;
+        private ICardService _cardService;
 
         public GameManager(
-            ICardManager<Domain.MonsterCard> monsterCardManager,
-            ICardManager<Domain.PlayerCard> playerCardManager,
+            ICardManager cardManager,
             IPlayerManager playerManager,
             IGameUtilities gameUtilities,
             IGameViewManager gameViewManager,
             ISettingsManager settingsManager,
-            ICardUtilities<Domain.MonsterCard> monsterCardUtilities,
-            ICardUtilities<Domain.PlayerCard> playerCardUtilities)
+            ICardUtilities monsterCardUtilities,
+            ICardUtilities playerCardUtilities)
         {
-            _monsterCardManager = monsterCardManager;
-            _playerCardManager = playerCardManager;
+            _cardManager = cardManager;
             _playerManager = playerManager;
             _gameViewManager = gameViewManager;
             _gameUtilities = gameUtilities;
@@ -87,24 +85,24 @@ namespace GameLogic.Game
             });
         }
 
-        public void PlayerPlaysEquipment(Domain.Game game, Domain.Player player, Domain.PlayerCard card)
+        public void PlayerPlaysEquipment(Domain.Game game, Domain.Player player, Domain.CardInstance card)
         {
             game.BlindActions[player] = card;
             game.ActionSide[player] = false;
         }
 
-        public void PlayerPlaysAction(Domain.Game game, Domain.Player player, Domain.PlayerCard card)
+        public void PlayerPlaysAction(Domain.Game game, Domain.Player player, Domain.CardInstance card)
         {
             game.BlindActions[player] = card;
             game.ActionSide[player] = true;
         }
 
-        public void AddCardToQueue(Domain.Game game, Domain.MonsterCard monsterCard)
+        public void AddCardToQueue(Domain.Game game, CardInstance monsterCard)
         {
             game.MonsterQueue.Enqueue(monsterCard);
         }
 
-        public void PlayCardBlind(Domain.Game game, Domain.Player player, Domain.PlayerCard card, bool actionSide)
+        public void PlayCardBlind(Domain.Game game, Domain.Player player, Domain.CardInstance card, bool actionSide)
         {
             game.BlindActions.Add(player, card);
             game.ActionSide[player] = actionSide;
@@ -165,7 +163,7 @@ namespace GameLogic.Game
             {
                 for (int i = 0; i < drawMax; ++i)
                 {
-                    var card = _playerCardManager.DrawCard(game, game.PlayerCardDeck);
+                    var card = _cardManager.DrawCard(game, game.PlayerCardDeck);
                     if (null != card)
                     {
                         kvp.Key.DrawCards.Add(card);
@@ -188,7 +186,7 @@ namespace GameLogic.Game
             }
             foreach (var p in otherPlayers)
             {
-                var card = _playerCardManager.DrawCard(game, game.PlayerCardDeck);
+                var card = _cardManager.DrawCard(game, game.PlayerCardDeck);
                 if (null != card)
                 {
                     p.DrawCards.Add(card);
@@ -249,7 +247,7 @@ namespace GameLogic.Game
             }
         }
 
-        public void ProcessKeep(Domain.Game game, Domain.Player player, List<Domain.PlayerCard> keepCards)
+        public void ProcessKeep(Domain.Game game, Domain.Player player, List<Domain.CardInstance> keepCards)
         {
             foreach (var card in keepCards)
             {
@@ -281,7 +279,7 @@ namespace GameLogic.Game
 
                 for (int i = 0; i < reward; ++i)
                 {
-                    var card = _playerCardManager.DrawCard(game, game.PlayerCardDeck);
+                    var card = _cardManager.DrawCard(game, game.PlayerCardDeck);
                     if (null != card)
                     {
                         fastestAmbush.Key.DrawCards.Add(card);
@@ -361,7 +359,7 @@ namespace GameLogic.Game
                 {
                     for (int i = 0; i < rewardValue; ++i)
                     {
-                        var card = _playerCardManager.DrawCard(game, game.PlayerCardDeck);
+                        var card = _cardManager.DrawCard(game, game.PlayerCardDeck);
                         player.Hand.Add(card);
                     }
                 }
@@ -413,40 +411,43 @@ namespace GameLogic.Game
 
         public void StartGame(Domain.Game game)
         {
-            foreach (var p in game.Players)
+            if (game.CurrentState == GameState.Pregame)
             {
-                game.PlayerReady[p] = false;
-                game.ActionSide[p] = false;
-            }
-
-            if (string.IsNullOrEmpty(game.Version))
-            {
-                var configuration = _settingsManager.GetConfiguration();
-                game.Version = configuration.DefaultVersion;
-            }
-
-            game.CurrentState = GameState.TurnStart;
-
-            game.PlayerCardDeck = _gameUtilities.LoadPlayerCardDeck(_gameUtilities.GetPlayerCardFileName(game));
-            game.MonsterCardDeck = _gameUtilities.LoadMonsterCardDeck(_gameUtilities.GetMonsterCardFileName(game));
-
-            _playerCardUtilities.Shuffle(game.PlayerCardDeck);
-            _monsterCardUtilities.Shuffle(game.MonsterCardDeck);
-
-            foreach (var p in game.Players)
-            {
-                // TODO 4/21/2016 bdrosander - add starting hand to game settings.
-                for (int i = 0; i < 5; ++i)
+                foreach (var p in game.Players)
                 {
-                    p.Hand.Add(_playerCardManager.DrawCard(game, game.PlayerCardDeck));
+                    game.PlayerReady[p] = false;
+                    game.ActionSide[p] = false;
                 }
-            }
 
-            _gameViewManager.OnUpdatedGameView(this, new GameViewEventArgs()
-            {
-                Action = ServerToClientAction.PlayBlind,
-                Game = game
-            });
+                if (string.IsNullOrEmpty(game.Version))
+                {
+                    var configuration = _settingsManager.GetConfiguration();
+                    game.Version = configuration.DefaultVersion;
+                }
+
+                game.CurrentState = GameState.TurnStart;
+
+                game.PlayerCardDeck.DrawPile = new Stack<CardInstance>(_cardService.GetPlayerCards(game.Version));
+                game.MonsterCardDeck.DrawPile = new Stack<CardInstance>(_cardService.GetMonsterCards(game.Version));
+
+                _playerCardUtilities.Shuffle(game.PlayerCardDeck);
+                _monsterCardUtilities.Shuffle(game.MonsterCardDeck);
+
+                foreach (var p in game.Players)
+                {
+                    // TODO 4/21/2016 bdrosander - add starting hand to game settings.
+                    for (int i = 0; i < 5; ++i)
+                    {
+                        p.Hand.Add(_cardManager.DrawCard(game, game.PlayerCardDeck));
+                    }
+                }
+
+                _gameViewManager.OnUpdatedGameView(this, new GameViewEventArgs()
+                {
+                    Action = ServerToClientAction.PlayBlind,
+                    Game = game
+                });
+            }
         }
     }
 }

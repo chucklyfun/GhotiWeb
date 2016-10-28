@@ -19,5 +19,14 @@ namespace Utilities
         public string DefaultVersion { get; set; }
 
         public string DataPath { get; set; }
+
+        public Configuration()
+        {
+            SocketConnectionAddress = string.Empty;
+            SocketConnectionPort = 0;
+            Name = string.Empty;
+            DefaultVersion = string.Empty;
+            DataPath = string.Empty;
+        }
     }
 }
